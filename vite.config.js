@@ -4,7 +4,7 @@ export default {
         host: true,
     },
     build: {
-        outDir: '../dist',
+        outDir: './dist',
         emptyOutDir: true,
         sourcemap: true
     },
