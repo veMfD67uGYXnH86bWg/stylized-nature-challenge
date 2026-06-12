@@ -15,17 +15,17 @@ export default [
     {
         name: 'grassColorTexture',
         type: 'texture',
-        path: 'public/textures/grass/color.jpg'
+        path: 'textures/grass/color.jpg'
     },
     {
         name: 'grassNormalTexture',
         type: 'texture',
-        path: 'public/textures/grass/normal.png'
+        path: 'textures/grass/normal.png'
     },
     {
         name: 'memeColorTexture',
         type: 'texture',
-        path: 'public/textures/meme/meme.jpg'
+        path: 'textures/meme/meme.jpg'
     },
     // {
     //     name: 'characterModel',
