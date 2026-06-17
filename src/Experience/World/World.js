@@ -1,7 +1,7 @@
 import Experience from '../Experience.js'
 import Environment from './Environment.js'
 import Floor from './Floor.js'
-import Meme from './Meme.js'
+// import Meme from './Meme.js'
 import Character from './Character.js'
 
 export default class World {
