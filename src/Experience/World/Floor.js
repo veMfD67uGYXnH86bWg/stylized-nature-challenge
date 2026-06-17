@@ -9,7 +9,7 @@ export default class Floor {
         this.resources = this.experience.resources
 
         this.setGeometry()
-        this.setTextures()
+        // this.setTextures()
         this.setMaterial()
         this.setMesh()
     }
@@ -35,9 +35,10 @@ export default class Floor {
 
     setMaterial() {
         // this.material = new THREE.MeshStandardNodeMaterial({
-        //     map: this.textures.color,
-        //     normalMap: this.textures.normal,
+        //     color: 0x32a852,
+        //     // normalMap: this.textures.normal,
         //     side: THREE.DoubleSide,
+        //
         // })
 
         const gridUv = uv().mul(100)
@@ -49,14 +50,14 @@ export default class Floor {
         const color = vec4(line, line, line, 1.0)
 
         this.material = new THREE.MeshStandardNodeMaterial({
-            // side: THREE.DoubleSide
+            //     side: THREE.DoubleSide
         })
         this.material.colorNode = color
     }
 
     setMesh() {
         this.mesh = new THREE.Mesh(this.geometry, this.material)
-        this.mesh.rotation.z = Math.PI * 0.1
+        this.mesh.rotation.z = Math.PI * 0.25
         this.mesh.rotation.x = -Math.PI * 0.5
         this.mesh.receiveShadow = true
         this.scene.add(this.mesh)

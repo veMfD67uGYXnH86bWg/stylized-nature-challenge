@@ -13,23 +13,24 @@ export default [
             ]
     },
     {
-        name: 'grassColorTexture',
-        type: 'texture',
-        path: 'textures/grass/color.jpg'
-    },
-    {
-        name: 'grassNormalTexture',
-        type: 'texture',
-        path: 'textures/grass/normal.png'
-    },
-    {
-        name: 'memeColorTexture',
-        type: 'texture',
-        path: 'textures/meme/meme.jpg'
+        name: 'characterModel',
+        type: 'gltfModel',
+        path: 'models/Character/character.glb'
     },
     // {
-    //     name: 'characterModel',
-    //     type: 'gltfModel',
-    //     path: 'models/Character/glTF/Character.gltf'
-    // }
+    //     name: 'grassColorTexture',
+    //     type: 'texture',
+    //     path: 'textures/grass/color.jpg'
+    // },
+    // {
+    //     name: 'grassNormalTexture',
+    //     type: 'texture',
+    //     path: 'textures/grass/normal.png'
+    // },
+    // {
+    //     name: 'memeColorTexture',
+    //     type: 'texture',
+    //     path: 'textures/meme/meme.jpg'
+    // },
+
 ]

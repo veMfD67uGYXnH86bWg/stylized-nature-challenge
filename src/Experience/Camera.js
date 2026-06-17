@@ -32,7 +32,7 @@ export default class Camera {
             lerpFactor: 0.08,
         }
 
-        this.baseOffset = new THREE.Vector3(8.326, 8.791, 0.387)
+        this.baseOffset = new THREE.Vector3(6.6, 8.791, 0)
         this.offset = this.baseOffset.clone().multiplyScalar(this.params.zoom)
         this.targetPosition = new THREE.Vector3()
 
@@ -64,10 +64,9 @@ export default class Camera {
     }
 
     updateProjection() {
-
         this.instance.fov = this.params.fov
         this.instance.updateProjectionMatrix()
-        
+
         this.offset.copy(this.baseOffset).multiplyScalar(this.params.zoom)
         // this.yAngle = Math.atan2(this.offset.x, this.offset.z)
         this.instance.updateProjectionMatrix()

@@ -1,8 +1,9 @@
 import Experience from '../Experience.js'
 import Environment from './Environment.js'
 import Floor from './Floor.js'
-// import Meme from './Meme.js'
 import Character from './Character.js'
+import Shapes from './Shapes.js'
+import * as THREE from 'three/webgpu'
 
 export default class World {
     constructor() {
@@ -16,15 +17,30 @@ export default class World {
             // Setup
             this.floor = new Floor()
             // this.meme = new Meme()
-            this.character = new Character()
             this.environment = new Environment()
 
+            this.shapes = []
+            this.shapes.push(new Shapes({
+                shape: 'sphere',
+                color: 0xff0000,
+                position: new THREE.Vector3(-2, 0.5, 2)
+            }).boundingBox)
+            this.shapes.push(new Shapes({
+                shape: 'box',
+                color: 0xffff00,
+                position: new THREE.Vector3(-2, 0.5, -2)
+            }).boundingBox)
+            this.shapes.push(new Shapes({
+                shape: 'torus',
+                color: 0xff00ff,
+                position: new THREE.Vector3(-2, 0.5, -6)
+            }).boundingBox)
+
+            this.character = new Character()
         })
     }
 
     update() {
-        if (this.meme)
-            this.meme.update()
         if (this.character)
             this.character.update()
     }
