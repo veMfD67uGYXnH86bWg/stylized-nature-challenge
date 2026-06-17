@@ -1,4 +1,4 @@
-import * as THREE from 'three'
+import * as THREE from 'three/webgpu'
 import Experience from './Experience.js'
 
 export default class Renderer {
@@ -13,14 +13,12 @@ export default class Renderer {
     }
 
     setInstance() {
-        this.instance = new THREE.WebGLRenderer({
+        this.instance = new THREE.WebGPURenderer({
             canvas: this.canvas,
             antialias: true
         })
         this.instance.toneMapping = THREE.CineonToneMapping
         this.instance.toneMappingExposure = 1.75
-        this.instance.shadowMap.enabled = true
-        this.instance.shadowMap.type = THREE.PCFShadowMap
         this.instance.setClearColor('#211d20')
         this.instance.setSize(this.sizes.width, this.sizes.height)
         this.instance.setPixelRatio(this.sizes.pixelRatio)

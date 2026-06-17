@@ -1,4 +1,4 @@
-import * as THREE from 'three'
+import * as THREE from 'three/webgpu'
 import Experience from './Experience.js'
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js'
 
@@ -12,10 +12,7 @@ export default class Camera {
 
         // Debug
         // if (this.debug.active) {
-        //     this.debugFolder = this.debug.ui.addFolder(
-        //         {
-        //             title: 'Camera',
-        //         })
+        //     this.debugFolder = this.debug.ui.addFolder({title: 'Camera'})
         // }
 
         this.setInstance()
@@ -23,43 +20,47 @@ export default class Camera {
     }
 
     setInstance() {
-        this.params = {}
-        this.params.frustumSize = 10
-        // this.params.frustumSize = 10
-        const aspect = this.sizes.width / this.sizes.height
-        this.instance = new THREE.OrthographicCamera(
-            (this.params.frustumSize * aspect) / -2,
-            (this.params.frustumSize * aspect) / 2,
-            this.params.frustumSize / 2,
-            this.params.frustumSize / -2,
-            0.1,
-            100
+        this.params = {
+            fov: 35,
+            near: 0.1,
+            far: 150,
+        }
+
+        this.instance = new THREE.PerspectiveCamera(
+            this.params.fov,
+            this.sizes.width / this.sizes.height,
+            this.params.near,
+            this.params.far
         )
-        this.instance.position.set(8, 8, 8)
-        this.instance.lookAt(0, 0, 0)
+        this.instance.position.set(8.326, 8.791, 0.387)
         this.scene.add(this.instance)
 
         // if (this.debug.active) {
-        //     this.debugFolder.addBinding(this.params, 'frustumSize', {
-        //         label: 'frustumSize',
-        //         min: 10,
-        //         max: 20,
-        //         step: 1
-        //     }).on('change', () => this.resize())
+        //     this.debugFolder.addBinding(this.params, 'fov', {label: 'FOV', min: 10, max: 90, step: 0.5})
+        //         .on('change', () => this.updateProjection())
         // }
     }
+
+    // updateProjection() {
+    //     this.instance.fov = this.params.fov
+    //     this.instance.updateProjectionMatrix()
+    // }
 
     setControls() {
         this.controls = new OrbitControls(this.instance, this.canvas)
         this.controls.enableDamping = true
+        this.controls.enableRotate = false
+        this.controls.mouseButtons = {
+            LEFT: THREE.MOUSE.PAN,
+            MIDDLE: THREE.MOUSE.DOLLY,
+            RIGHT: THREE.MOUSE.PAN,
+        }
+        this.controls.target.set(0.3591, 0, -3.083)
+        this.controls.update()
     }
 
     resize() {
-        const aspect = this.sizes.width / this.sizes.height
-        this.instance.left = (this.params.frustumSize * aspect) / -2
-        this.instance.right = (this.params.frustumSize * aspect) / 2
-        this.instance.top = this.params.frustumSize / 2
-        this.instance.bottom = this.params.frustumSize / -2
+        this.instance.aspect = this.sizes.width / this.sizes.height
         this.instance.updateProjectionMatrix()
     }
 

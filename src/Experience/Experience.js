@@ -1,4 +1,4 @@
-import * as THREE from 'three'
+import * as THREE from 'three/webgpu'
 
 import Debug from './utils/Debug.js'
 import Sizes from './utils/Sizes.js'
@@ -41,14 +41,14 @@ export default class Experience {
         this.renderer = new Renderer()
         this.world = new World()
 
-        // Resize event
         this.sizes.on('resize', () => {
             this.resize()
         })
 
-        // Time tick event
-        this.time.on('tick', () => {
-            this.update()
+        this.renderer.instance.init().then(() => {
+            this.time.on('tick', () => {
+                this.update()
+            })
         })
     }
 
@@ -74,7 +74,7 @@ export default class Experience {
 
                 for (const key in child.material) {
                     const value = child.material[key]
-                    
+
                     if (value && typeof value.dispose === 'function') {
                         value.dispose()
                     }

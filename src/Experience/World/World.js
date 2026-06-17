@@ -15,7 +15,7 @@ export default class World {
         this.resources.on('ready', () => {
             // Setup
             this.floor = new Floor()
-            this.meme = new Meme()
+            // this.meme = new Meme()
             this.character = new Character()
             this.environment = new Environment()
 
@@ -25,5 +25,7 @@ export default class World {
     update() {
         if (this.meme)
             this.meme.update()
+        if (this.billboard)
+            this.billboard.update()
     }
 }
