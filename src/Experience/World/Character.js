@@ -8,6 +8,12 @@ export default class Character {
         this.resources = this.experience.resources
         this.time = this.experience.time
         this.debug = this.experience.debug
+        this.input = this.experience.input
+        this.params = {}
+        this.params.speed = 0.007
+
+        this.camera = this.experience.camera
+        this.direction = new THREE.Vector3()
 
         // Debug
         if (this.debug.active) {
@@ -22,7 +28,7 @@ export default class Character {
 
         this.setGeometry()
         this.setMaterial()
-
+        this.setSpeed()
         this.setModel()
         this.setPosition()
         // this.setAnimation()
@@ -37,6 +43,19 @@ export default class Character {
             color: 0x42adf5,
             // wireframe: true,
         })
+    }
+
+
+    setSpeed() {
+        // Speed Debug
+        if (this.debug.active) {
+            this.debugFolder.addBinding(this.params, 'speed', {
+                label: 'Speed',
+                min: 0.001,
+                max: 0.05,
+                step: 0.001
+            })
+        }
     }
 
     setModel() {
@@ -106,5 +125,19 @@ export default class Character {
     update() {
         // if (this.animation)
         // this.animation.mixer.update(this.time.delta * 0.001)
+
+        this.direction.set(0, 0, 0)
+
+        if (this.input.isPressed('KeyW')) this.direction.z -= 1
+        if (this.input.isPressed('KeyS')) this.direction.z += 1
+        if (this.input.isPressed('KeyA')) this.direction.x -= 1
+        if (this.input.isPressed('KeyD')) this.direction.x += 1
+
+        this.direction.applyEuler(new THREE.Euler(0, this.camera.yAngle, 0))
+        this.direction.normalize()
+        this.direction.multiplyScalar(this.params.speed * this.time.delta)
+        this.model.position.add(this.direction)
+
+
     }
 }
