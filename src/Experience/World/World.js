@@ -25,7 +25,7 @@ export default class World {
     update() {
         if (this.meme)
             this.meme.update()
-        if (this.billboard)
-            this.billboard.update()
+        if (this.character)
+            this.character.update()
     }
 }

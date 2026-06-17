@@ -3,6 +3,7 @@ import * as THREE from 'three/webgpu'
 import Debug from './utils/Debug.js'
 import Sizes from './utils/Sizes.js'
 import Time from './utils/Time.js'
+import Input from './utils/Input.js'
 import Camera from './Camera.js'
 import Renderer from './Renderer.js'
 import World from './World/World.js'
@@ -30,6 +31,7 @@ export default class Experience {
         this.debug = new Debug()
         this.sizes = new Sizes()
         this.time = new Time()
+        this.input = new Input()
         this.scene = new THREE.Scene()
 
         this.axesHelper = new THREE.AxesHelper(2)
@@ -61,6 +63,7 @@ export default class Experience {
         this.camera.update()
         this.world.update()
         this.renderer.update()
+
     }
 
     destroy() {
