@@ -1,8 +1,8 @@
 import Experience from '../Experience.js'
 import Environment from './Environment.js'
-import Floor from './Floor.js'
 import Character from './Character.js'
 import Shapes from './Shapes.js'
+import Terrain from './Terrain.js'
 import * as THREE from 'three/webgpu'
 
 export default class World {
@@ -15,9 +15,9 @@ export default class World {
         // Wait for resources
         this.resources.on('ready', () => {
             // Setup
-            this.floor = new Floor()
-            // this.meme = new Meme()
             this.environment = new Environment()
+            this.terrain = new Terrain()
+
 
             this.shapes = []
             this.shapes.push(new Shapes({
@@ -43,5 +43,7 @@ export default class World {
     update() {
         if (this.character)
             this.character.update()
+        if (this.environment)
+            this.environment.update()
     }
 }

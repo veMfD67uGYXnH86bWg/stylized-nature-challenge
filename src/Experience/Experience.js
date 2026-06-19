@@ -64,6 +64,7 @@ export default class Experience {
         this.world.update()
         this.renderer.update()
 
+
     }
 
     destroy() {

@@ -22,10 +22,9 @@ export default class Character {
 
         this.setGeometry()
         this.setMaterial()
-        this.setModel()
+        this.setMesh()
         this.setPosition()
         this.setBoundingBox()
-        // this.setAnimation()
     }
 
     setGeometry() {
@@ -49,17 +48,14 @@ export default class Character {
     }
 
 
-    setModel() {
-        this.model = new THREE.Mesh(this.geometry, this.material)
+    setMesh() {
+        this.mesh = new THREE.Mesh(this.geometry, this.material)
         if (this.shape == 'torus') {
-            this.model.rotation.x = -Math.PI * 0.5
+            this.mesh.rotation.x = -Math.PI * 0.5
         }
-        // this.model = this.resource.scene
-        // this.model.position.copy(this.position)
-        // this.model.scale.set(0.02, 0.02, 0.02)
-        this.scene.add(this.model)
+        this.scene.add(this.mesh)
 
-        this.model.traverse((child) => {
+        this.mesh.traverse((child) => {
             if (child instanceof THREE.Mesh) {
                 child.castShadow = true
             }
@@ -67,26 +63,18 @@ export default class Character {
     }
 
     setPosition() {
-        this.model.position.copy(this.position)
-    }
-
-    setAnimation() {
-
+        this.mesh.position.copy(this.position)
     }
 
     setBoundingBox() {
         this.boundingBox = new THREE.Box3()
-        this.boundingBoxHelper = new THREE.Box3Helper(this.boundingBox, 0xffffff)
-        this.scene.add(this.boundingBoxHelper)
-        // this.boundingBoxHelper.visible = false
-        this.boundingBox.setFromObject(this.model)
+        this.boundingBox.setFromObject(this.mesh)
 
         if (this.debug.active) {
+            this.boundingBoxHelper = new THREE.Box3Helper(this.boundingBox, 0xffffff)
+            this.scene.add(this.boundingBoxHelper)
+            // BoundingBox Debug
             this.debugFolder.addBinding(this.boundingBoxHelper, 'visible', {label: 'boundingBox'})
         }
-    }
-
-    update() {
-        // this.boundingBox.setFromObject(this.model)
     }
 }

@@ -11,7 +11,7 @@ export default class Character {
         this.input = this.experience.input
         this.params = {}
         this.params.speed = 3
-        this.floor = this.experience.world.floor
+        this.terrain = this.experience.world.terrain
         this.camera = this.experience.camera
 
         // Movement
@@ -33,8 +33,8 @@ export default class Character {
         // Resource
         this.resource = this.resources.items.characterModel
 
-        this.setGeometry()
-        this.setMaterial()
+        // this.setGeometry()
+        // this.setMaterial()
         this.setSpeed()
         this.setModel()
         this.setPosition()
@@ -70,9 +70,7 @@ export default class Character {
     }
 
     setModel() {
-        // this.model = new THREE.Mesh(this.geometry, this.material)
         this.model = this.resource.scene
-        // this.model.scale.set(0.02, 0.02, 0.02)
         this.scene.add(this.model)
 
         this.model.traverse((child) => {
@@ -92,10 +90,10 @@ export default class Character {
         this.halfHeight = this.boundingBoxSize.y * 0.5
 
         this.boundingBox = new THREE.Box3()
-        this.boundingBoxHelper = new THREE.Box3Helper(this.boundingBox, 0xffffff)
-        this.scene.add(this.boundingBoxHelper)
 
         if (this.debug.active) {
+            this.boundingBoxHelper = new THREE.Box3Helper(this.boundingBox, 0xffffff)
+            this.scene.add(this.boundingBoxHelper)
             this.debugFolder.addBinding(this.boundingBoxHelper, 'visible', {label: 'boundingBox'})
         }
     }
@@ -182,9 +180,9 @@ export default class Character {
             }
         })
 
-        // Floor collision
+        // Floor (terrain) collision
         this.raycaster.set(this.model.position, this.downVector)
-        const hits = this.raycaster.intersectObject(this.floor.mesh)
+        const hits = this.raycaster.intersectObject(this.terrain.model)
         if (hits.length > 0) {
             this.model.position.y = hits[0].point.y + this.halfHeight
         }

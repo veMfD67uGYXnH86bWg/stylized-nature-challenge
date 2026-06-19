@@ -17,11 +17,26 @@ export default [
         type: 'gltfModel',
         path: 'models/Character/character.glb'
     },
-    // {
-    //     name: 'grassColorTexture',
-    //     type: 'texture',
-    //     path: 'textures/grass/color.jpg'
-    // },
+    {
+        name: 'terrainModel',
+        type: 'gltfModel',
+        path: 'models/Terrain/test2.glb'
+    },
+    {
+        name: 'grassColorTexture',
+        type: 'texture',
+        path: 'textures/grass.jpg'
+    },
+    {
+        name: 'dirtColorTexture',
+        type: 'texture',
+        path: 'textures/dirt.jpg'
+    },
+    {
+        name: 'waterColorTexture',
+        type: 'texture',
+        path: 'textures/water.jpg'
+    },
     // {
     //     name: 'grassNormalTexture',
     //     type: 'texture',
