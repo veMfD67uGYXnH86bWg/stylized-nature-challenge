@@ -15,19 +15,15 @@ let instance = null
 
 export default class Experience {
     constructor(_canvas) {
-        // Singleton
         if (instance) {
             return instance
         }
         instance = this
 
-        // Global access
         window.experience = this
 
-        // Options
         this.canvas = _canvas
 
-        // Setup
         this.debug = new Debug()
         this.sizes = new Sizes()
         this.time = new Time()
@@ -43,6 +39,7 @@ export default class Experience {
         this.renderer = new Renderer()
         this.world = new World()
 
+
         this.sizes.on('resize', () => {
             this.resize()
         })
@@ -52,6 +49,7 @@ export default class Experience {
                 this.update()
             })
         })
+
     }
 
     resize() {
@@ -63,8 +61,6 @@ export default class Experience {
         this.camera.update()
         this.world.update()
         this.renderer.update()
-
-
     }
 
     destroy() {

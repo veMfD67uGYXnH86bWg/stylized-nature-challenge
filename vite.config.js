@@ -2,6 +2,7 @@ export default {
     publicDir: './public/',
     server: {
         host: true,
+        open: '/#debug'
     },
     build: {
         outDir: './dist',

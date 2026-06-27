@@ -21,3 +21,5 @@ Open at http://localhost:5173/ or http://localhost:5173/#debug.
 ## Credits
 
 Placeholder character model & animations from [Mixamo](https://www.mixamo.com).
+
+Pleaceholder dragon model from [Riot Games](https://www.riotgames.com/en/legal)

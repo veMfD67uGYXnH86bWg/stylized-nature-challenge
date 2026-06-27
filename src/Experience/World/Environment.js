@@ -13,11 +13,12 @@ export default class Environment {
             this.debugFolder = this.debug.ui.addFolder(
                 {
                     title: 'Environment',
-                    expanded: true,
+                    expanded: false,
                 })
         }
 
         this.setSunLight()
+        this.setAmbientLight()
         this.setEnvironmentMap()
     }
 
@@ -51,11 +52,10 @@ export default class Environment {
             offsetZ: -2,
         }
 
-        // Debug
         if (this.debug.active) {
             this.lightFolder = this.debugFolder.addFolder({title: 'Light'})
             this.lightFolder.addBinding(this.sunLight, 'intensity', {
-                label: 'Intensity',
+                label: 'Sun Intensity',
                 min: 0,
                 max: 10,
                 step: 0.001
@@ -92,6 +92,22 @@ export default class Environment {
         }
     }
 
+    setAmbientLight() {
+        this.ambientLight = new THREE.AmbientLight(0xffffff, 0.1)
+        this.scene.add(this.ambientLight)
+
+        console.log('Loaded Environment')
+        if (this.debug.active) {
+            this.lightFolder.addBinding(this.ambientLight, 'intensity', {
+                label: 'Abient Intensity',
+                min: 0,
+                max: 10,
+                step: 0.001
+            })
+        }
+
+    }
+
     setEnvironmentMap() {
         this.environmentMap = {}
         this.environmentMap.intensity = 0.4
@@ -113,7 +129,6 @@ export default class Environment {
         }
         this.environmentMap.updateMaterials()
 
-        // Debug
         if (this.debug.active) {
             this.envMapFolder = this.debugFolder.addFolder({title: 'Environment Map'})
             this.envMapFolder.addBinding(this.environmentMap, 'intensity', {

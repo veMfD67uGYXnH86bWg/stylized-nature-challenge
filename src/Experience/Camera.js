@@ -1,5 +1,6 @@
 import * as THREE from 'three/webgpu'
 import Experience from './Experience.js'
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js'
 
 export default class Camera {
     constructor() {
@@ -9,27 +10,26 @@ export default class Camera {
         this.canvas = this.experience.canvas
         this.debug = this.experience.debug
 
-        // Debug
         if (this.debug.active) {
             this.debugFolder = this.debug.ui.addFolder({title: 'Camera'})
         }
 
-        this.setInstance()
-        // this.setControls
+        this.setCamera()
+        this.setControls()
 
         const cameraDirection = new THREE.Vector3()
         this.instance.getWorldDirection(cameraDirection)
-        // this.yAngle = Math.atan2(cameraDirection.x, cameraDirection.z)
         this.yAngle = Math.atan2(this.offset.x, this.offset.z)
     }
 
-    setInstance() {
+    setCamera() {
         this.params = {
             fov: 35,
             near: 0.1,
             far: 150,
             zoom: 1.5,
             lerpFactor: 0.08,
+            isOrbit: false,
         }
 
         this.baseOffset = new THREE.Vector3(6.6, 8.791, 0)
@@ -42,24 +42,28 @@ export default class Camera {
             this.params.near,
             this.params.far
         )
-        // this.instance.position.set(8.326, 8.791, 0.387)
         this.instance.position.copy(this.offset)
         this.scene.add(this.instance)
 
-        // FOV Debug
         if (this.debug.active) {
             this.debugFolder.addBinding(this.params, 'fov', {label: 'FOV', min: 10, max: 90, step: 0.5})
                 .on('change', () => this.updateProjection())
-        }
-
-        // Zoom Debug
-        if (this.debug.active) {
             this.debugFolder.addBinding(this.params, 'zoom', {label: 'Zoom', min: 1, max: 2, step: 0.01})
                 .on('change', () => this.updateProjection())
-        }
-        // Lerp Debug
-        if (this.debug.active) {
             this.debugFolder.addBinding(this.params, 'lerpFactor', {label: 'Lerp', min: 0.01, max: 0.1, step: 0.001})
+            this.debugFolder.addBinding(this.params, 'isOrbit', {label: 'OrbitControls'})
+                .on('change', () => this.switchCamera())
+        }
+
+    }
+
+    switchCamera() {
+        if (this.params.isOrbit) {
+            this.controls.enabled = true
+            this.controls.target.copy(this.character.model.position)
+            this.controls.update()
+        } else {
+            this.controls.enabled = false
         }
     }
 
@@ -68,22 +72,15 @@ export default class Camera {
         this.instance.updateProjectionMatrix()
 
         this.offset.copy(this.baseOffset).multiplyScalar(this.params.zoom)
-        // this.yAngle = Math.atan2(this.offset.x, this.offset.z)
         this.instance.updateProjectionMatrix()
     }
 
-    /*setControls() {
+    setControls() {
         this.controls = new OrbitControls(this.instance, this.canvas)
         this.controls.enableDamping = true
-        this.controls.enableRotate = false
-        this.controls.mouseButtons = {
-            LEFT: THREE.MOUSE.PAN,
-            MIDDLE: THREE.MOUSE.DOLLY,
-            RIGHT: THREE.MOUSE.PAN,
-        }
-        this.controls.target.set(0.3591, 0, -3.083)
-        this.controls.update()
-    }*/
+        this.controls.enableRotate = true
+        this.controls.enabled = false
+    }
 
     resize() {
         this.instance.aspect = this.sizes.width / this.sizes.height
@@ -93,18 +90,18 @@ export default class Camera {
     update() {
         if (!this.character) {
             this.character = this.experience.world.character
+        } else {
+            if (!this.params.isOrbit) {
+                if (!this.lookAtTarget) this.lookAtTarget = new THREE.Vector3()
+
+                const characterPos = this.character.model.position
+                this.targetPosition.copy(characterPos).add(this.offset)
+                this.instance.position.lerp(this.targetPosition, this.params.lerpFactor)
+                this.lookAtTarget.lerp(characterPos, this.params.lerpFactor)
+                this.instance.lookAt(this.lookAtTarget)
+            } else {
+                this.controls.update()
+            }
         }
-
-        if (this.character) {
-            if (!this.lookAtTarget) this.lookAtTarget = new THREE.Vector3()
-
-            const characterPos = this.character.model.position
-            this.targetPosition.copy(characterPos).add(this.offset)
-            this.instance.position.lerp(this.targetPosition, this.params.lerpFactor)
-            this.lookAtTarget.lerp(characterPos, this.params.lerpFactor)
-            this.instance.lookAt(this.lookAtTarget)
-        }
-
-        // this.controls.update()
     }
 }

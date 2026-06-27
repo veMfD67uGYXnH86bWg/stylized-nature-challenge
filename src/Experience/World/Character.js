@@ -9,20 +9,16 @@ export default class Character {
         this.time = this.experience.time
         this.debug = this.experience.debug
         this.input = this.experience.input
-        this.params = {}
-        this.params.speed = 3
         this.terrain = this.experience.world.terrain
         this.camera = this.experience.camera
 
-        // Movement
         this.direction = new THREE.Vector3()
-        this.shapes = this.experience.world.shapes
+        this.colliders = this.experience.world.colliders
         this.raycaster = new THREE.Raycaster()
         this.downVector = new THREE.Vector3(0, -1, 0)
         this.targetRotation = 0 // smooth rotation LERP
         this.isRunning = false
 
-        // Debug
         if (this.debug.active) {
             this.debugFolder = this.debug.ui.addFolder(
                 {
@@ -30,11 +26,8 @@ export default class Character {
                 })
         }
 
-        // Resource
         this.resource = this.resources.items.characterModel
 
-        // this.setGeometry()
-        // this.setMaterial()
         this.setSpeed()
         this.setModel()
         this.setPosition()
@@ -58,7 +51,10 @@ export default class Character {
     }
 
     setSpeed() {
-        // Speed Debug
+        this.params = {
+            speed: 7,
+        }
+
         if (this.debug.active) {
             this.debugFolder.addBinding(this.params, 'speed', {
                 label: 'Speed',
@@ -78,11 +74,23 @@ export default class Character {
                 child.castShadow = true
             }
         })
+
+        console.log('Loaded Character Model')
     }
 
     setPosition() {
         this.model.position.set(0, 0, 0)
         this.model.rotation.set(0, Math.PI / 2, 0)
+
+        if (this.debug.active) {
+            const btn = this.debugFolder.addButton({
+                title: 'Print position',
+                label: 'Print position',
+            })
+            btn.on('click', () => {
+                console.log(this.model.position)
+            })
+        }
     }
 
     setBoundingBox() {
@@ -114,13 +122,9 @@ export default class Character {
 
     setAnimation() {
         this.animation = {}
-
-        // Mixer
         this.animation.mixer = new THREE.AnimationMixer(this.model)
 
-        // Actions
         this.animation.actions = {}
-
         this.animation.actions.idle = this.animation.mixer.clipAction(this.resource.animations[0])
         this.animation.actions.running = this.animation.mixer.clipAction(this.resource.animations[1])
         this.animation.actions.walking = this.animation.mixer.clipAction(this.resource.animations[2])
@@ -128,7 +132,6 @@ export default class Character {
         this.animation.actions.current = this.animation.actions.idle
         this.animation.actions.current.play()
 
-        // Play the action
         this.playAnimation()
     }
 
@@ -136,7 +139,13 @@ export default class Character {
         if (this.animation)
             this.animation.mixer.update(this.time.delta * 0.001)
 
-        const previousPosition = this.model.position.clone()
+        this.handleMovement()
+        this.handleCollision()
+
+    }
+
+    handleMovement() {
+        this.previousPosition = this.model.position.clone()
         this.direction.set(0, 0, 0)
 
         if (this.input.isPressed('KeyW')) this.direction.z -= 1
@@ -149,7 +158,6 @@ export default class Character {
             this.direction.normalize()
 
             // Character rotation animation smoothing
-            // this.model.rotation.y = Math.atan2(this.direction.x, this.direction.z)
             this.targetRotation = Math.atan2(this.direction.x, this.direction.z)
             const delta = ((this.targetRotation - this.model.rotation.y + Math.PI * 3) % (Math.PI * 2)) - Math.PI
             this.model.rotation.y += delta * 0.1
@@ -161,20 +169,22 @@ export default class Character {
             this.animation.play('idle')
         }
 
-        const movedPosition = this.model.position.clone()
+        this.movedPosition = this.model.position.clone()
         this.boundingBox.setFromCenterAndSize(this.model.position, this.boundingBoxSize)
+    }
 
-        // Collision detection
-        this.shapes.forEach(shape => {
-            if (this.boundingBox.intersectsBox(shape)) {
-                this.model.position.x = previousPosition.x
+    handleCollision() {
+        // Objects Collision
+        this.colliders.forEach(collider => {
+            if (this.boundingBox.intersectsBox(collider)) {
+                this.model.position.x = this.previousPosition.x
                 this.boundingBox.setFromCenterAndSize(this.model.position, this.boundingBoxSize)
-                if (this.boundingBox.intersectsBox(shape)) {
-                    this.model.position.x = movedPosition.x
-                    this.model.position.z = previousPosition.z
+                if (this.boundingBox.intersectsBox(collider)) {
+                    this.model.position.x = this.movedPosition.x
+                    this.model.position.z = this.previousPosition.z
                     this.boundingBox.setFromCenterAndSize(this.model.position, this.boundingBoxSize)
-                    if (this.boundingBox.intersectsBox(shape)) {
-                        this.model.position.copy(previousPosition)
+                    if (this.boundingBox.intersectsBox(collider)) {
+                        this.model.position.copy(this.previousPosition)
                     }
                 }
             }

@@ -4,6 +4,7 @@ import Experience from '../Experience.js'
 export default class Character {
     constructor({shape, color, position}) {
         this.experience = new Experience()
+        this.world = this.experience.world
         this.scene = this.experience.scene
         this.resources = this.experience.resources
         this.time = this.experience.time
@@ -12,11 +13,11 @@ export default class Character {
         this.color = color
         this.position = position
 
-        // Debug
         if (this.debug.active) {
             this.debugFolder = this.debug.ui.addFolder(
                 {
                     title: `${this.shape[0].toUpperCase() + this.shape.slice(1)}`,
+                    expanded: false,
                 })
         }
 
@@ -29,7 +30,8 @@ export default class Character {
 
     setGeometry() {
         if (this.shape == 'box') {
-            this.geometry = new THREE.BoxGeometry(1.2, 1.2, 1.2)
+            // this.geometry = new THREE.BoxGeometry(1.2, 1.2, 1.2)
+            this.geometry = new THREE.BoxGeometry(0.2, 5, 0.2)
         }
         if (this.shape == 'sphere') {
             this.geometry = new THREE.SphereGeometry(1, 16, 16)
@@ -60,6 +62,8 @@ export default class Character {
                 child.castShadow = true
             }
         })
+
+        console.log(`Loaded ${this.shape} shape`)
     }
 
     setPosition() {
@@ -69,11 +73,11 @@ export default class Character {
     setBoundingBox() {
         this.boundingBox = new THREE.Box3()
         this.boundingBox.setFromObject(this.mesh)
+        this.world.colliders.push(this.boundingBox)
 
         if (this.debug.active) {
             this.boundingBoxHelper = new THREE.Box3Helper(this.boundingBox, 0xffffff)
             this.scene.add(this.boundingBoxHelper)
-            // BoundingBox Debug
             this.debugFolder.addBinding(this.boundingBoxHelper, 'visible', {label: 'boundingBox'})
         }
     }
