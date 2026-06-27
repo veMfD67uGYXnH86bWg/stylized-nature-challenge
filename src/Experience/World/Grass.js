@@ -32,6 +32,7 @@ export default class Grass {
             this.debugFolder = this.debug.ui.addFolder(
                 {
                     title: `Grass`,
+                    expanded: false,
                 })
             this.bladesFolder = this.debugFolder.addFolder({title: 'Blades'})
             this.colorFolder = this.debugFolder.addFolder({title: 'Color'})
