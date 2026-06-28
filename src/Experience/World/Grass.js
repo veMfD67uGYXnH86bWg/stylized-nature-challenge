@@ -49,14 +49,14 @@ export default class Grass {
         bladeMesh.material.side = THREE.DoubleSide
 
         this.params = {
-            count: 4096,
+            count: 8192,
             spread: 16,
             size: 1.3,
             hueSpan: 1,
             saturationSpan: 11,
             luminositySpan: 34,
-            tiltZ: 0,
-            posY: -0.2
+            tiltZ: 0.25,
+            posY: 0
         }
         const bladeParams = {}
         const colorParams = {}
@@ -82,7 +82,7 @@ export default class Grass {
                 )
                 const rotationY = Math.random() * Math.PI * 2
                 dummy.rotation.order = 'XZY'
-                dummy.rotation.set(-this.params.tiltZ, rotationY, 0)
+                dummy.rotation.set(0, rotationY, this.params.tiltZ)
                 dummy.scale.setScalar(size)
                 dummy.updateMatrix()
                 mesh.setMatrixAt(i, dummy.matrix)

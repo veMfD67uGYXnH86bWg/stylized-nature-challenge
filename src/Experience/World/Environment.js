@@ -8,7 +8,6 @@ export default class Environment {
         this.resources = this.experience.resources
         this.debug = this.experience.debug
 
-        // Debug
         if (this.debug.active) {
             this.debugFolder = this.debug.ui.addFolder(
                 {
@@ -93,7 +92,7 @@ export default class Environment {
     }
 
     setAmbientLight() {
-        this.ambientLight = new THREE.AmbientLight(0xffffff, 0.1)
+        this.ambientLight = new THREE.AmbientLight(0xffffff, 1.0)
         this.scene.add(this.ambientLight)
 
         console.log('Loaded Environment')

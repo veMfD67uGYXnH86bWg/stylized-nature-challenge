@@ -52,13 +52,20 @@ export default class Character {
 
     setSpeed() {
         this.params = {
-            speed: 7,
+            speed: 2.5,
+            speedFactor: 2.5,
         }
 
         if (this.debug.active) {
             this.debugFolder.addBinding(this.params, 'speed', {
                 label: 'Speed',
                 min: 1,
+                max: 5,
+                step: 0.1
+            })
+            this.debugFolder.addBinding(this.params, 'speedFactor', {
+                label: 'Speed Factor',
+                min: 2,
                 max: 5,
                 step: 0.1
             })
@@ -72,6 +79,7 @@ export default class Character {
         this.model.traverse((child) => {
             if (child instanceof THREE.Mesh) {
                 child.castShadow = true
+                child.receiveShadow = true
             }
         })
 
@@ -162,7 +170,7 @@ export default class Character {
             const delta = ((this.targetRotation - this.model.rotation.y + Math.PI * 3) % (Math.PI * 2)) - Math.PI
             this.model.rotation.y += delta * 0.1
 
-            this.direction.multiplyScalar(this.params.speed * this.time.delta * (this.isRunning ? 2 : 1) * 0.001)
+            this.direction.multiplyScalar(this.params.speed * this.time.delta * (this.isRunning ? this.params.speedFactor : 1) * 0.001)
             this.model.position.add(this.direction)
             this.animation.play(this.isRunning ? 'running' : 'walking')
         } else {

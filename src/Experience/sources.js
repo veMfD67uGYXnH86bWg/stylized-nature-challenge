@@ -42,7 +42,7 @@ export default [
     {
         name: 'grassModel',
         type: 'gltfModel',
-        path: 'models/grassTilted.glb',
+        path: 'models/grass.glb',
     },
     {
         name: 'dirtColorTexture',
