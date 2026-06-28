@@ -65,7 +65,7 @@ export default class Character {
             })
             this.debugFolder.addBinding(this.params, 'speedFactor', {
                 label: 'Speed Factor',
-                min: 2,
+                min: 1,
                 max: 5,
                 step: 0.1
             })

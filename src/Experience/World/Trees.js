@@ -71,9 +71,9 @@ export default class Trees {
                 .on('change', e => uBottom.value = e.value)
             this.debugFolder.addBinding(p, 'top', {label: 'leafTop', min: 0, max: 2, step: 0.01})
                 .on('change', e => uTop.value = e.value)
-            this.debugFolder.addBinding(p, 'ColorA', {label: 'leafTintA'})
+            this.debugFolder.addBinding(p, 'ColorA', {label: 'leafColorA'})
                 .on('change', e => uColorA.value.set(e.value))
-            this.debugFolder.addBinding(p, 'ColorB', {label: 'leafTintB'})
+            this.debugFolder.addBinding(p, 'ColorB', {label: 'leafColorB'})
                 .on('change', e => uColorB.value.set(e.value))
         }
     }
