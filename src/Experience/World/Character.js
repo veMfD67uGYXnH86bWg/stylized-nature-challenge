@@ -1,5 +1,6 @@
 import * as THREE from 'three/webgpu'
 import Experience from '../Experience.js'
+import Outline from './Outline.js'
 
 export default class Character {
     constructor() {
@@ -82,6 +83,13 @@ export default class Character {
                 child.receiveShadow = true
             }
         })
+
+        this.params.outline = 0.02
+        this.outline = new Outline({thickness: this.params.outline}).add(this.model)
+        if (this.debug.active) {
+            this.debugFolder.addBinding(this.params, 'outline', {label: 'Outline', min: 0, max: 0.1, step: 0.001})
+                .on('change', e => this.outline.uThickness.value = e.value)
+        }
 
         console.log('Loaded Character Model')
     }

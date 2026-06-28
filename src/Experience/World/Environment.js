@@ -25,7 +25,7 @@ export default class Environment {
         this.sunLight = new THREE.DirectionalLight('#ffffff', 4.0)
         this.sunLight.castShadow = true
         this.sunLight.shadow.camera.near = 0.1
-        this.sunLight.shadow.camera.far = 20.5
+        this.sunLight.shadow.camera.far = 30
         this.sunLight.shadow.mapSize.set(1024, 1024)
         this.sunLight.shadow.normalBias = 0.05
         this.scene.add(this.sunLight)
@@ -33,10 +33,10 @@ export default class Environment {
         this.shadowHelper = new THREE.CameraHelper(this.sunLight.shadow.camera)
         this.scene.add(this.shadowHelper)
         this.shadowHelper.visible = false
-        this.sunLight.shadow.camera.top = 7.2
-        this.sunLight.shadow.camera.bottom = -10
-        this.sunLight.shadow.camera.left = -12
-        this.sunLight.shadow.camera.right = 16.5
+        this.sunLight.shadow.camera.top = 10
+        this.sunLight.shadow.camera.bottom = -7.2
+        this.sunLight.shadow.camera.left = -11
+        this.sunLight.shadow.camera.right = 18
 
 
         this.minMaxStepNegative = {min: -20, max: 0, step: 0.1}
@@ -46,9 +46,9 @@ export default class Environment {
         const minMaxNearFar = {min: 0.1, max: 50, step: 0.5}
         this.params = {left: 0, right: 1, bottom: 0, top: 1}
         this.lightParams = {
-            offsetX: 6.74,
-            offsetY: 4,
-            offsetZ: -2,
+            offsetX: 10,
+            offsetY: 10,
+            offsetZ: -6.1,
         }
 
         if (this.debug.active) {

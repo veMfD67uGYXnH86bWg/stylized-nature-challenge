@@ -1,7 +1,22 @@
 import * as THREE from 'three/webgpu'
-import {texture, positionLocal, mix, vec4, uniform, attribute, color} from 'three/tsl'
+import {
+    texture,
+    positionLocal,
+    positionWorld,
+    normalLocal,
+    mix,
+    vec3,
+    vec4,
+    uniform,
+    attribute,
+    color,
+    smoothstep,
+    cos,
+    sin
+} from 'three/tsl'
 import Experience from '../Experience.js'
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js'
+import getWind from './Wind.js'
 
 export default class Trees {
     constructor() {
@@ -53,28 +68,60 @@ export default class Trees {
         const uTop = uniform(1.0)
         const shade = mix(uBottom, uTop, heightFactor)
 
-        const uColorA = uniform(color('#b84e4e'))
-        const uColorB = uniform(color('#81a208'))
+        const uColorA = uniform(color('#04b209'))
+        const uColorB = uniform(color('#96bc0e'))
         const leafRandom = attribute('aLeafRandom', 'float')
         const tint = mix(uColorA, uColorB, leafRandom)
+
+        const noiseTexture = this.resources.items.noiseTexture
+        noiseTexture.wrapS = noiseTexture.wrapT = THREE.RepeatWrapping
+        const uNoiseScale = uniform(0.25)
+        const uNoiseA = uniform(color('#cf93cb'))
+        const uNoiseB = uniform(color('#030303'))
+        const uSmoothMin = uniform(0.3)
+        const uSmoothMax = uniform(0.7)
+        const noise = texture(noiseTexture, positionWorld.xz.mul(uNoiseScale)).r
+        const noiseColor = mix(uNoiseA, uNoiseB, smoothstep(uSmoothMin, uSmoothMax, noise))
 
         const tex = texture(leafTexture)
         this.leafMaterial = new THREE.MeshStandardNodeMaterial({
             alphaTest: 0.6,
             side: THREE.DoubleSide,
         })
-        this.leafMaterial.colorNode = vec4(tex.rgb.mul(shade).mul(tint), tex.a)
+        this.leafMaterial.colorNode = vec4(tex.rgb.mul(shade).mul(tint).mul(noiseColor), tex.a)
+
+        const wind = getWind()
+        const aTreeRotation = attribute('aTreeRotation', 'float')
+        const cR = cos(aTreeRotation)
+        const sR = sin(aTreeRotation)
+        const wave = wind.sampleWave(positionWorld)
+        const windOffset = vec3(wave.mul(sR).negate(), 0, wave.mul(cR)).mul(heightFactor)
+        this.leafMaterial.positionNode = positionLocal.add(windOffset)
 
         if (this.debug.active) {
-            const p = {bottom: 0.45, top: 1.0, ColorA: '#b84e4e', ColorB: '#81a208'}
-            this.debugFolder.addBinding(p, 'bottom', {label: 'leafBottom', min: 0, max: 1, step: 0.01})
+            const params = {
+                bottom: 0.45, top: 1.0, ColorA: '#04b209', ColorB: '#96bc0e',
+                noiseScale: 0.25, noiseA: '#cf93cb', noiseB: '#030303', smoothMin: 0.3, smoothMax: 0.7,
+            }
+            this.debugFolder.addBinding(params, 'bottom', {label: 'leafBottomBrightness', min: 0, max: 1, step: 0.01})
                 .on('change', e => uBottom.value = e.value)
-            this.debugFolder.addBinding(p, 'top', {label: 'leafTop', min: 0, max: 2, step: 0.01})
+            this.debugFolder.addBinding(params, 'top', {label: 'leafTopBrightness', min: 0, max: 2, step: 0.01})
                 .on('change', e => uTop.value = e.value)
-            this.debugFolder.addBinding(p, 'ColorA', {label: 'leafColorA'})
+            this.debugFolder.addBinding(params, 'ColorA', {label: 'leafColorA'})
                 .on('change', e => uColorA.value.set(e.value))
-            this.debugFolder.addBinding(p, 'ColorB', {label: 'leafColorB'})
+            this.debugFolder.addBinding(params, 'ColorB', {label: 'leafColorB'})
                 .on('change', e => uColorB.value.set(e.value))
+            this.debugFolder.addBinding(params, 'noiseScale', {min: 0.005, max: 1.2, step: 0.001})
+                .on('change', e => uNoiseScale.value = e.value)
+            this.debugFolder.addBinding(params, 'noiseA', {label: 'leafNoiseA'})
+                .on('change', e => uNoiseA.value.set(e.value))
+            this.debugFolder.addBinding(params, 'noiseB', {label: 'leafNoiseB'})
+                .on('change', e => uNoiseB.value.set(e.value))
+            this.debugFolder.addBinding(params, 'smoothMin', {min: 0, max: 1, step: 0.01})
+                .on('change', e => uSmoothMin.value = e.value)
+            this.debugFolder.addBinding(params, 'smoothMax', {min: 0, max: 1, step: 0.01})
+                .on('change', e => uSmoothMax.value = e.value)
+            getWind().setupDebug(this.debugFolder.addFolder({title: 'Wind'}))
         }
     }
 
@@ -92,7 +139,7 @@ export default class Trees {
 
         let trunkGeometry
         const trunkMaterial = new THREE.MeshStandardNodeMaterial({
-            color: 0x382f1d,
+            color: 0x1f1602,
         })
         this.resources.items.treeModel.scene.traverse(obj => {
             if (obj.isMesh) {
@@ -100,9 +147,17 @@ export default class Trees {
             }
         })
 
+        const uOutline = uniform(0.01)
+        const outlineMaterial = new THREE.MeshBasicNodeMaterial({side: THREE.BackSide})
+        outlineMaterial.colorNode = color('#000000')
+        outlineMaterial.positionNode = positionLocal.add(normalLocal.mul(uOutline))
+
         const trunkMesh = new THREE.InstancedMesh(trunkGeometry, trunkMaterial, trees.length)
+        const outlineMesh = new THREE.InstancedMesh(trunkGeometry, outlineMaterial, trees.length)
         const leafMesh = new THREE.InstancedMesh(this.leafGeometry, this.leafMaterial, trees.length)
         const dummy = new THREE.Object3D()
+
+        const treeRotationArray = new Float32Array(trees.length)
 
         trees.forEach((tree, i) => {
             dummy.position.copy(tree.position)
@@ -110,14 +165,30 @@ export default class Trees {
             dummy.scale.setScalar(tree.scale)
             dummy.updateMatrix()
             trunkMesh.setMatrixAt(i, dummy.matrix)
+            outlineMesh.setMatrixAt(i, dummy.matrix)
             leafMesh.setMatrixAt(i, dummy.matrix)
+            treeRotationArray[i] = tree.rotationY
         })
 
+        this.leafGeometry.setAttribute('aTreeRotation', new THREE.InstancedBufferAttribute(treeRotationArray, 1))
+
         trunkMesh.instanceMatrix.needsUpdate = true
+        outlineMesh.instanceMatrix.needsUpdate = true
         leafMesh.instanceMatrix.needsUpdate = true
         trunkMesh.castShadow = true
         leafMesh.castShadow = true
-        this.scene.add(trunkMesh, leafMesh)
+        this.scene.add(trunkMesh, outlineMesh, leafMesh)
         console.log(`Loaded ${trees.length} trees`)
+
+        if (this.debug.active) {
+            this.debugFolder.addBinding({v: 0.01}, 'v', {
+                label: 'trunkOutline',
+                min: 0,
+                max: 0.2,
+                step: 0.005,
+                index: 9
+            })
+                .on('change', e => uOutline.value = e.value)
+        }
     }
 }

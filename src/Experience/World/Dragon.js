@@ -1,5 +1,6 @@
 import * as THREE from 'three/webgpu'
 import Experience from '../Experience.js'
+import Outline from './Outline.js'
 
 export default class Dragon {
     constructor() {
@@ -27,7 +28,8 @@ export default class Dragon {
 
     setModel() {
         this.params = {
-            scale: 0.018
+            scale: 0.018,
+            outline: 1.5,
         }
         this.model = this.resource.scene
         this.model.scale.set(this.params.scale, this.params.scale, this.params.scale)
@@ -39,9 +41,12 @@ export default class Dragon {
             }
         })
 
+        this.outline = new Outline({thickness: this.params.outline}).add(this.model)
         console.log('Loaded Dragon Model (Placeholder)')
 
         if (this.debug.active) {
+            this.debugFolder.addBinding(this.params, 'outline', {label: 'Outline', min: 0.05, max: 3, step: 0.01})
+                .on('change', e => this.outline.uThickness.value = e.value)
             this.debugFolder.addBinding(this.params, 'scale', {
                 label: 'Scale',
                 min: 0.01,

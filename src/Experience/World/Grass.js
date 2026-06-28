@@ -131,7 +131,7 @@ export default class Grass {
                 step: 0.5,
             }).on('change', () => rebuild())
             this.bladesFolder.addBinding(this.params, 'size', {
-                label: 'size',
+                label: 'Size',
                 min: 0.1,
                 max: 2,
                 step: 0.01

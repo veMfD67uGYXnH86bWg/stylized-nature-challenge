@@ -15,6 +15,7 @@ export default class Terrain {
             this.debugFolder = this.debug.ui.addFolder(
                 {
                     title: `Terrain`,
+                    expanded: false,
                 })
         }
 
