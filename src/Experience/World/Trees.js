@@ -12,7 +12,11 @@ import {
     color,
     smoothstep,
     cos,
-    sin
+    sin,
+    add,
+    mul,
+    time,
+    mx_noise_float,
 } from 'three/tsl'
 import Experience from '../Experience.js'
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js'
@@ -97,7 +101,31 @@ export default class Trees {
         const sR = sin(aTreeRotation)
         const wave = wind.sampleWave(aTreePosition)
         const windOffset = vec3(wave.mul(sR).negate(), 0, wave.mul(cR)).mul(heightFactor)
-        this.leafMaterial.positionNode = positionLocal.add(windOffset)
+
+        // Wind Noise
+        this.windParams = {
+            windNoiseSpeed: 0.8,
+            windNoiseStrength: 0.08,
+            windNoiseTiling: {x: 0.8, y: 1.0, z: 0.8},
+        }
+
+        const uWindNoiseSpeed = uniform(this.windParams.windNoiseSpeed)
+        const uWindNoiseStrength = uniform(this.windParams.windNoiseStrength)
+        const uWindNoiseTiling = uniform(new THREE.Vector3(
+            this.windParams.windNoiseTiling.x,
+            this.windParams.windNoiseTiling.y,
+            this.windParams.windNoiseTiling.z
+        ))
+        const windNoiseFunction = (worldPos) => {
+            const scroll = add(worldPos, vec3(mul(uWindNoiseSpeed, time), 0, mul(uWindNoiseSpeed, time)))
+            const tiled = mul(scroll, uWindNoiseTiling)
+            return mx_noise_float(tiled).mul(0.5).add(0.5).mul(uWindNoiseStrength)
+        }
+        const windNoise = windNoiseFunction(aTreePosition)
+        const localNoise = vec3(windNoise.mul(sR), 0, windNoise.mul(cR)).mul(heightFactor)
+
+
+        this.leafMaterial.positionNode = positionLocal.add(windOffset).add(localNoise)
 
         const debugMat = new THREE.MeshBasicNodeMaterial()
         const windWaveDebug = wind.sampleWave(positionWorld).mul(-1) // mul(-1) because strength is negative
@@ -133,6 +161,36 @@ export default class Trees {
                 .on('change', e => uSmoothMax.value = e.value)
             this.windFolder = getWind().setupDebug(this.debugFolder.addFolder({title: 'Wind'}))
             this.windFolder.addBinding(debugPlane, 'visible', {label: 'Shader Plane'})
+            this.windFolder.addBinding(this.windParams, 'windNoiseSpeed', {
+                label: 'Noise Speed',
+                min: 0,
+                max: 20,
+                step: 0.1
+            })
+                .on('change', () => {
+                    uWindNoiseSpeed.value = this.windParams.windNoiseSpeed
+                })
+            this.windFolder.addBinding(this.windParams, 'windNoiseStrength', {
+                label: 'Noise Strength',
+                min: 0,
+                max: 1,
+                step: 0.01
+            })
+                .on('change', () => {
+                    uWindNoiseStrength.value = this.windParams.windNoiseStrength
+                })
+            this.windFolder.addBinding(this.windParams, 'windNoiseTiling', {
+                label: 'Noise Tiling',
+                x: {min: 0.01, max: 4, step: 0.01},
+                y: {min: 0.01, max: 4, step: 0.01},
+                z: {min: 0.01, max: 4, step: 0.01},
+            }).on('change', () => {
+                uWindNoiseTiling.value.set(
+                    this.windParams.windNoiseTiling.x,
+                    this.windParams.windNoiseTiling.y,
+                    this.windParams.windNoiseTiling.z
+                )
+            })
         }
     }
 
