@@ -170,19 +170,23 @@ export default class Character {
         if (this.input.isPressed('KeyD')) this.direction.x += 1
 
         if (this.direction.length() > 0) {
-            this.direction.applyEuler(new THREE.Euler(0, this.camera.yAngle, 0)) // Adjusts direction depending on camera angle
-            this.direction.normalize()
+
+            this.direction2 = this.direction.clone()
+            this.direction2.applyEuler(new THREE.Euler(0, this.camera.yAngle, 0)) // Adjusts direction depending on camera angle
+            this.direction2.normalize()
 
             // Character rotation animation smoothing
-            this.targetRotation = Math.atan2(this.direction.x, this.direction.z)
+            this.targetRotation = Math.atan2(this.direction2.x, this.direction2.z)
             const delta = ((this.targetRotation - this.model.rotation.y + Math.PI * 3) % (Math.PI * 2)) - Math.PI
             this.model.rotation.y += delta * 0.1
 
-            this.direction.multiplyScalar(this.params.speed * this.time.delta * (this.isRunning ? this.params.speedFactor : 1) * 0.001)
-            this.model.position.add(this.direction)
+            this.direction2.multiplyScalar(this.params.speed * this.time.delta * (this.isRunning ? this.params.speedFactor : 1) * 0.001)
+            this.model.position.add(this.direction2)
             this.animation.play(this.isRunning ? 'running' : 'walking')
+            this.isMoving = true
         } else {
             this.animation.play('idle')
+            this.isMoving = false
         }
 
         this.movedPosition = this.model.position.clone()

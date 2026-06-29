@@ -19,6 +19,7 @@ import {
     vec3,
 } from 'three/tsl'
 import Experience from '../Experience.js'
+import getWind from './Wind.js'
 
 export default class Grass {
     constructor() {
@@ -49,17 +50,16 @@ export default class Grass {
         bladeMesh.material.side = THREE.DoubleSide
 
         this.params = {
+            posY: 0,
             count: 8192,
             spread: 16,
             size: 1.3,
+            tiltZ: 0.25,
             hueSpan: 1,
             saturationSpan: 11,
             luminositySpan: 34,
-            tiltZ: 0.25,
-            posY: 0
         }
-        const bladeParams = {}
-        const colorParams = {}
+
         let mesh = null
 
         const rebuild = () => {
@@ -112,6 +112,7 @@ export default class Grass {
         console.log('Loaded Grass')
 
         if (this.debug.active) {
+            this.colorSingleFolder = this.colorFolder.addFolder({title: 'Individual Color (Per Blade)'})
             this.bladesFolder.addBinding(this.params, 'posY', {
                 label: 'Position Y',
                 min: -1,
@@ -145,22 +146,22 @@ export default class Grass {
                 }
                 mesh.instanceMatrix.needsUpdate = true
             })
-            this.colorFolder.addBinding(this.params, 'hueSpan', {
-                label: 'Hue',
-                min: 1,
-                max: 300,
+            this.colorSingleFolder.addBinding(this.params, 'hueSpan', {
+                label: 'Hue Randomness Span',
+                min: 0,
+                max: 270,
                 step: 1,
             }).on('change', () => rebuild())
-            this.colorFolder.addBinding(this.params, 'saturationSpan', {
-                label: 'Saturation',
-                min: 1,
-                max: 300,
+            this.colorSingleFolder.addBinding(this.params, 'saturationSpan', {
+                label: 'Saturation Randomness Span',
+                min: 0,
+                max: 60,
                 step: 1,
             }).on('change', () => rebuild())
-            this.colorFolder.addBinding(this.params, 'luminositySpan', {
-                label: 'Luminosity',
-                min: 1,
-                max: 300,
+            this.colorSingleFolder.addBinding(this.params, 'luminositySpan', {
+                label: 'Luminosity Randomness Span',
+                min: 0,
+                max: 85,
                 step: 1,
             }).on('change', () => rebuild())
             this.bladesFolder.addBinding(this.params, 'tiltZ', {
@@ -183,58 +184,58 @@ export default class Grass {
             colorB: '#396442'
         }
 
-        const noiseScale = uniform(this.materialParams.noiseScale)
-        const smoothMin = uniform(this.materialParams.smoothMin)
-        const smoothMax = uniform(this.materialParams.smoothMax)
+        const uNoiseScale = uniform(this.materialParams.noiseScale)
+        const uSmoothMin = uniform(this.materialParams.smoothMin)
+        const uSmoothMax = uniform(this.materialParams.smoothMax)
 
-        const tiledUv = positionWorld.xz.mul(noiseScale)
+        const tiledUv = positionWorld.xz.mul(uNoiseScale)
         const noise = texture(this.resources.items.noiseTexture, tiledUv).r
-        const noiseRemap = smoothstep(smoothMin, smoothMax, noise)
+        const noiseRemap = smoothstep(uSmoothMin, uSmoothMax, noise)
 
-        const colorA = uniform(color("#021908"))
-        const colorB = uniform(color("#044c13"))
+        const uColorA = uniform(color("#021908"))
+        const uColorB = uniform(color("#044c13"))
 
-        const grassColor = mix(colorA, colorB, noiseRemap)
+        const grassColor = mix(uColorA, uColorB, noiseRemap)
 
         this.material = new THREE.MeshStandardNodeMaterial()
         this.material.colorNode = grassColor
         this.material.side = THREE.DoubleSide
 
         if (this.debug.active) {
-            this.colorFolder.addBinding(this.materialParams, 'noiseScale', {min: 0.01, max: 0.2, step: 0.001})
+            this.colorTotalityFolder = this.colorFolder.addFolder({title: 'Grass Color (Totality)'})
+            this.colorTotalityFolder.addBinding(this.materialParams, 'noiseScale', {min: 0.01, max: 0.2, step: 0.001})
                 .on('change', () => {
-                    noiseScale.value = this.materialParams.noiseScale
+                    uNoiseScale.value = this.materialParams.noiseScale
                 })
-            this.colorFolder.addBinding(this.materialParams, 'smoothMin', {min: 0.1, max: 0.5, step: 0.01})
+            this.colorTotalityFolder.addBinding(this.materialParams, 'smoothMin', {min: 0.1, max: 0.5, step: 0.01})
                 .on('change', () => {
-                    smoothMin.value = this.materialParams.smoothMin
+                    uSmoothMin.value = this.materialParams.smoothMin
                 })
-            this.colorFolder.addBinding(this.materialParams, 'smoothMax', {min: 0.5, max: 1, step: 0.01})
+            this.colorTotalityFolder.addBinding(this.materialParams, 'smoothMax', {min: 0.5, max: 1, step: 0.01})
                 .on('change', () => {
-                    smoothMax.value = this.materialParams.smoothMax
+                    uSmoothMax.value = this.materialParams.smoothMax
                 })
-            this.colorFolder.addBinding(this.materialParams, 'colorA').on('change', () => {
-                colorA.value.set(this.materialParams.colorA)
+            this.colorTotalityFolder.addBinding(this.materialParams, 'colorA').on('change', () => {
+                uColorA.value.set(this.materialParams.colorA)
             })
-            this.colorFolder.addBinding(this.materialParams, 'colorB').on('change', () => {
-                colorB.value.set(this.materialParams.colorB)
+            this.colorTotalityFolder.addBinding(this.materialParams, 'colorB').on('change', () => {
+                uColorB.value.set(this.materialParams.colorB)
             })
         }
     }
 
     setWind() {
         this.windParams = {
-            windWaveSpeed: 3.4,
+            windWaveSpeed: 6.2,
             windWaveStrength: -0.7,
             windWaveTiling: {x: 0.11, y: 1.0, z: 0.13},
-            windHeightPower: 2.0,
+            windHeightPower: 1.0,
             windNoiseSpeed: 2.8,
             windNoiseStrength: 0.08,
             windNoiseTiling: {x: 0.8, y: 1.0, z: 0.8},
         }
-        this.windWaveParams = {}
-        this.windNoiseParams = {}
 
+        // Wind Wave
         const uWindWaveSpeed = uniform(this.windParams.windWaveSpeed)
         const uWindWaveStrength = uniform(this.windParams.windWaveStrength)
         const uWindWaveTiling = uniform(new THREE.Vector3(
@@ -244,24 +245,26 @@ export default class Grass {
         ))
 
         const uHeightPower = uniform(this.windParams.windHeightPower)
-        const bladeHeight = positionLocal.y.add(0.2).div(0.6).clamp(0, 1).pow(uHeightPower)
+        const bladeHeight = positionLocal.y.pow(uHeightPower)
 
         const aInstancePos = attribute('aInstancePos', 'vec3')
         const aRotation = attribute('aRotation', 'float')
 
-        const rawWave = (worldPos) => {
+        const windWaveFunction = (worldPos) => {
             const scroll = add(worldPos, vec3(0, 0, mul(uWindWaveSpeed, time)))
             const tiled = mul(scroll, uWindWaveTiling)
-            return mx_noise_float(tiled).clamp(0, 1)
+            return mx_noise_float(tiled).clamp(0, 1).mul(uWindWaveStrength)
         }
-        const sampleWave = (worldPos) => rawWave(worldPos).mul(uWindWaveStrength)
-
-        const windWave = sampleWave(aInstancePos)
+        const windWave = windWaveFunction(aInstancePos)
 
         const c = cos(aRotation)
         const s = sin(aRotation)
+        // const windd = getWind()
+        // const wavee = windd.sampleWave(aInstancePos)
+        // const localWind = vec3(wavee.mul(s).negate(), 0, wwave.mul(c)).mul(bladeHeight)
         const localWind = vec3(windWave.mul(s).negate(), 0, windWave.mul(c)).mul(bladeHeight)
 
+        // Wind Noise
         const uWindNoiseSpeed = uniform(this.windParams.windNoiseSpeed)
         const uWindNoiseStrength = uniform(this.windParams.windNoiseStrength)
         const uWindNoiseTiling = uniform(new THREE.Vector3(
@@ -270,19 +273,22 @@ export default class Grass {
             this.windParams.windNoiseTiling.z
         ))
 
-        const rawNoise = (worldPos) => {
+        const windNoiseFunction = (worldPos) => {
             const scroll = add(worldPos, vec3(mul(uWindNoiseSpeed, time), 0, mul(uWindNoiseSpeed, time)))
             const tiled = mul(scroll, uWindNoiseTiling)
-            return mx_noise_float(tiled).mul(0.5).add(0.5)
+            return mx_noise_float(tiled).mul(0.5).add(0.5).mul(uWindNoiseStrength)
         }
-        const windNoise = rawNoise(aInstancePos).mul(uWindNoiseStrength)
-        const localNoise = vec3(windNoise.mul(s).negate(), 0, windNoise.mul(c)).mul(bladeHeight)
+        const windNoise = windNoiseFunction(aInstancePos)
+        const localNoise = vec3(windNoise.mul(s), 0, windNoise.mul(c)).mul(bladeHeight)
 
         // Character push
         this.uCharPos = uniform(new THREE.Vector3())
         this.uCharDir = uniform(new THREE.Vector2())
         this.uCharSpeed = uniform(0)
-        this.charParams = {radius: 0.7, strength: 0.4}
+        this.charParams = {
+            radius: 0.7,
+            strength: 0.4
+        }
         const uCharRadius = uniform(this.charParams.radius)
         const uCharStrength = uniform(this.charParams.strength)
 
@@ -292,13 +298,13 @@ export default class Grass {
         const localPushX = this.uCharDir.x.mul(c).sub(this.uCharDir.y.mul(s))
         const localPushZ = this.uCharDir.x.mul(s).add(this.uCharDir.y.mul(c))
         const localPush = vec3(localPushX, 0, localPushZ)
-            .mul(falloff).mul(this.uCharSpeed).mul(uCharStrength).mul(bladeHeight)
+            .mul(falloff).mul(uCharStrength).mul(bladeHeight)
 
         this.material.positionNode = positionLocal.add(localWind).add(localNoise).add(localPush)
 
         if (this.debug.active) {
             const debugMat = new THREE.MeshBasicNodeMaterial()
-            const windWaveDebug = rawWave(positionWorld)
+            const windWaveDebug = windWaveFunction(positionWorld).mul(-1) // mul(-1) because strength is negative
             debugMat.colorNode = vec3(windWaveDebug, windWaveDebug, windWaveDebug)
             const debugPlane = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), debugMat)
             debugPlane.rotation.x = -Math.PI * 0.5
@@ -307,19 +313,30 @@ export default class Grass {
             debugPlane.visible = false
 
             const windFolder = this.debugFolder.addFolder({title: 'Wind'})
-            windFolder.addBinding(this.windParams, 'windWaveSpeed', {min: 0, max: 10, step: 0.1})
+            windFolder.addBinding(this.windParams, 'windWaveSpeed', {label: 'Wave Speed', min: 0, max: 10, step: 0.1})
                 .on('change', () => {
                     uWindWaveSpeed.value = this.windParams.windWaveSpeed
                 })
-            windFolder.addBinding(this.windParams, 'windWaveStrength', {min: -2, max: 2, step: 0.01})
+            windFolder.addBinding(this.windParams, 'windWaveStrength', {
+                label: 'Wave Strength',
+                min: -2,
+                max: 0,
+                step: 0.01
+            })
                 .on('change', () => {
                     uWindWaveStrength.value = this.windParams.windWaveStrength
                 })
-            windFolder.addBinding(this.windParams, 'windHeightPower', {min: 0.5, max: 10, step: 0.1})
+            windFolder.addBinding(this.windParams, 'windHeightPower', {
+                label: 'Height Power',
+                min: 0.5,
+                max: 10,
+                step: 0.1
+            })
                 .on('change', () => {
                     uHeightPower.value = this.windParams.windHeightPower
                 })
             windFolder.addBinding(this.windParams, 'windWaveTiling', {
+                label: 'Wave Tiling',
                 x: {min: 0.01, max: 2, step: 0.01},
                 y: {min: 0.01, max: 2, step: 0.01},
                 z: {min: 0.01, max: 2, step: 0.01},
@@ -330,17 +347,23 @@ export default class Grass {
                     this.windParams.windWaveTiling.z
                 )
             })
-            windFolder.addBinding(debugPlane, 'visible', {label: 'Shader plane'})
+            windFolder.addBinding(debugPlane, 'visible', {label: 'Shader Plane'})
 
-            windFolder.addBinding(this.windParams, 'windNoiseSpeed', {min: 0, max: 20, step: 0.1})
+            windFolder.addBinding(this.windParams, 'windNoiseSpeed', {label: 'Noise Speed', min: 0, max: 20, step: 0.1})
                 .on('change', () => {
                     uWindNoiseSpeed.value = this.windParams.windNoiseSpeed
                 })
-            windFolder.addBinding(this.windParams, 'windNoiseStrength', {min: 0, max: 1, step: 0.01})
+            windFolder.addBinding(this.windParams, 'windNoiseStrength', {
+                label: 'Noise Strength',
+                min: 0,
+                max: 1,
+                step: 0.01
+            })
                 .on('change', () => {
                     uWindNoiseStrength.value = this.windParams.windNoiseStrength
                 })
             windFolder.addBinding(this.windParams, 'windNoiseTiling', {
+                label: 'Noise Tiling',
                 x: {min: 0.01, max: 4, step: 0.01},
                 y: {min: 0.01, max: 4, step: 0.01},
                 z: {min: 0.01, max: 4, step: 0.01},
@@ -353,11 +376,11 @@ export default class Grass {
             })
 
             const charFolder = this.debugFolder.addFolder({title: 'Character Push'})
-            charFolder.addBinding(this.charParams, 'radius', {min: 0.1, max: 5, step: 0.1})
+            charFolder.addBinding(this.charParams, 'radius', {label: 'Radius', min: 0.1, max: 5, step: 0.1})
                 .on('change', () => {
                     uCharRadius.value = this.charParams.radius
                 })
-            charFolder.addBinding(this.charParams, 'strength', {min: 0, max: 3, step: 0.05})
+            charFolder.addBinding(this.charParams, 'strength', {label: 'Strength', min: 0, max: 3, step: 0.05})
                 .on('change', () => {
                     uCharStrength.value = this.charParams.strength
                 })
@@ -377,15 +400,10 @@ export default class Grass {
 
         const dx = pos.x - this.prevCharPos.x
         const dz = pos.z - this.prevCharPos.z
-        const speed = Math.sqrt(dx * dx + dz * dz)
 
-        if (speed > 0.0001) {
-            this.uCharDir.value.set(dx / speed, dz / speed)
+        if (character.isMoving) {
+            this.uCharDir.value.set(character.direction.z, -character.direction.x)
         }
-
-        const targetSpeed = Math.min(speed * 40, 1)
-        const lerpFactor = targetSpeed > this.uCharSpeed.value ? 0.15 : 0.04
-        this.uCharSpeed.value += (targetSpeed - this.uCharSpeed.value) * lerpFactor
 
         this.prevCharPos.copy(pos)
     }

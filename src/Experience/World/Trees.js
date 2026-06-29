@@ -92,11 +92,21 @@ export default class Trees {
 
         const wind = getWind()
         const aTreeRotation = attribute('aTreeRotation', 'float')
+        const aTreePosition = attribute('aTreePosition', 'vec3')
         const cR = cos(aTreeRotation)
         const sR = sin(aTreeRotation)
-        const wave = wind.sampleWave(positionWorld)
+        const wave = wind.sampleWave(aTreePosition)
         const windOffset = vec3(wave.mul(sR).negate(), 0, wave.mul(cR)).mul(heightFactor)
         this.leafMaterial.positionNode = positionLocal.add(windOffset)
+
+        const debugMat = new THREE.MeshBasicNodeMaterial()
+        const windWaveDebug = wind.sampleWave(positionWorld).mul(-1) // mul(-1) because strength is negative
+        debugMat.colorNode = vec3(windWaveDebug, windWaveDebug, windWaveDebug)
+        const debugPlane = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), debugMat)
+        debugPlane.rotation.x = -Math.PI * 0.5
+        debugPlane.position.set(5, 0.1, 0)
+        this.scene.add(debugPlane)
+        debugPlane.visible = false
 
         if (this.debug.active) {
             const params = {
@@ -121,7 +131,8 @@ export default class Trees {
                 .on('change', e => uSmoothMin.value = e.value)
             this.debugFolder.addBinding(params, 'smoothMax', {min: 0, max: 1, step: 0.01})
                 .on('change', e => uSmoothMax.value = e.value)
-            getWind().setupDebug(this.debugFolder.addFolder({title: 'Wind'}))
+            this.windFolder = getWind().setupDebug(this.debugFolder.addFolder({title: 'Wind'}))
+            this.windFolder.addBinding(debugPlane, 'visible', {label: 'Shader Plane'})
         }
     }
 
@@ -157,6 +168,7 @@ export default class Trees {
         const leafMesh = new THREE.InstancedMesh(this.leafGeometry, this.leafMaterial, trees.length)
         const dummy = new THREE.Object3D()
 
+        const treePositionArray = new Float32Array(trees.length * 3)
         const treeRotationArray = new Float32Array(trees.length)
 
         trees.forEach((tree, i) => {
@@ -168,9 +180,13 @@ export default class Trees {
             outlineMesh.setMatrixAt(i, dummy.matrix)
             leafMesh.setMatrixAt(i, dummy.matrix)
             treeRotationArray[i] = tree.rotationY
+            treePositionArray[i * 3 + 0] = dummy.position.x
+            treePositionArray[i * 3 + 1] = dummy.position.y
+            treePositionArray[i * 3 + 2] = dummy.position.z
         })
 
         this.leafGeometry.setAttribute('aTreeRotation', new THREE.InstancedBufferAttribute(treeRotationArray, 1))
+        this.leafGeometry.setAttribute('aTreePosition', new THREE.InstancedBufferAttribute(treePositionArray, 3))
 
         trunkMesh.instanceMatrix.needsUpdate = true
         outlineMesh.instanceMatrix.needsUpdate = true
