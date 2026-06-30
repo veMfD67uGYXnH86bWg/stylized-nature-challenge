@@ -16,6 +16,7 @@ export default class Dragon {
             this.debugFolder = this.debug.ui.addFolder(
                 {
                     title: 'Dragon',
+                    expanded: false,
                 })
         }
 
@@ -59,7 +60,7 @@ export default class Dragon {
     }
 
     setPosition() {
-        this.model.position.set(-41.6, 0, -8.67)
+        this.model.position.set(-48, 0, -11.25)
         this.model.rotation.set(0, Math.PI, 0)
     }
 
