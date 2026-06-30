@@ -30,9 +30,11 @@ export default class Experience {
         this.input = new Input()
         this.scene = new THREE.Scene()
 
-        this.axesHelper = new THREE.AxesHelper(2)
-        this.axesHelper.position.set(0, 0.1, 0)
-        this.scene.add(this.axesHelper)
+        if (this.debug.active) {
+            this.axesHelper = new THREE.AxesHelper(2)
+            this.axesHelper.position.set(0, 0.1, 0)
+            this.scene.add(this.axesHelper)
+        }
 
         this.resources = new Resources(sources)
         this.camera = new Camera()

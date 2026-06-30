@@ -24,6 +24,7 @@ export default class Character {
             this.debugFolder = this.debug.ui.addFolder(
                 {
                     title: 'Character',
+                    expanded: false,
                 })
         }
 

@@ -98,7 +98,7 @@ export default class Environment {
         console.log('Loaded Environment')
         if (this.debug.active) {
             this.lightFolder.addBinding(this.ambientLight, 'intensity', {
-                label: 'Abient Intensity',
+                label: 'Ambient Intensity',
                 min: 0,
                 max: 10,
                 step: 0.001

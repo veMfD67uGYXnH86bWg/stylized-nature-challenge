@@ -35,6 +35,7 @@ export default class Trees {
             this.debugFolder = this.debug.ui.addFolder(
                 {
                     title: 'Trees',
+                    expanded: false,
                 })
         }
 
@@ -141,23 +142,29 @@ export default class Trees {
                 bottom: 0.45, top: 1.0, ColorA: '#04b209', ColorB: '#96bc0e',
                 noiseScale: 0.25, noiseA: '#cf93cb', noiseB: '#030303', smoothMin: 0.3, smoothMax: 0.7,
             }
-            this.debugFolder.addBinding(params, 'bottom', {label: 'leafBottomBrightness', min: 0, max: 1, step: 0.01})
+            this.treeColorFolder = this.debugFolder.addFolder({title: 'Color'})
+            this.treeColorFolder.addBinding(params, 'bottom', {
+                label: 'leafBottomBrightness',
+                min: 0,
+                max: 1,
+                step: 0.01
+            })
                 .on('change', e => uBottom.value = e.value)
-            this.debugFolder.addBinding(params, 'top', {label: 'leafTopBrightness', min: 0, max: 2, step: 0.01})
+            this.treeColorFolder.addBinding(params, 'top', {label: 'leafTopBrightness', min: 0, max: 2, step: 0.01})
                 .on('change', e => uTop.value = e.value)
-            this.debugFolder.addBinding(params, 'ColorA', {label: 'leafColorA'})
+            this.treeColorFolder.addBinding(params, 'ColorA', {label: 'leafColorA'})
                 .on('change', e => uColorA.value.set(e.value))
-            this.debugFolder.addBinding(params, 'ColorB', {label: 'leafColorB'})
+            this.treeColorFolder.addBinding(params, 'ColorB', {label: 'leafColorB'})
                 .on('change', e => uColorB.value.set(e.value))
-            this.debugFolder.addBinding(params, 'noiseScale', {min: 0.005, max: 1.2, step: 0.001})
+            this.treeColorFolder.addBinding(params, 'noiseScale', {min: 0.005, max: 1.2, step: 0.001})
                 .on('change', e => uNoiseScale.value = e.value)
-            this.debugFolder.addBinding(params, 'noiseA', {label: 'leafNoiseA'})
+            this.treeColorFolder.addBinding(params, 'noiseA', {label: 'leafNoiseA'})
                 .on('change', e => uNoiseA.value.set(e.value))
-            this.debugFolder.addBinding(params, 'noiseB', {label: 'leafNoiseB'})
+            this.treeColorFolder.addBinding(params, 'noiseB', {label: 'leafNoiseB'})
                 .on('change', e => uNoiseB.value.set(e.value))
-            this.debugFolder.addBinding(params, 'smoothMin', {min: 0, max: 1, step: 0.01})
+            this.treeColorFolder.addBinding(params, 'smoothMin', {min: 0, max: 1, step: 0.01})
                 .on('change', e => uSmoothMin.value = e.value)
-            this.debugFolder.addBinding(params, 'smoothMax', {min: 0, max: 1, step: 0.01})
+            this.treeColorFolder.addBinding(params, 'smoothMax', {min: 0, max: 1, step: 0.01})
                 .on('change', e => uSmoothMax.value = e.value)
             this.windFolder = getWind().setupDebug(this.debugFolder.addFolder({title: 'Wind'}))
             this.windFolder.addBinding(debugPlane, 'visible', {label: 'Shader Plane'})
@@ -260,7 +267,7 @@ export default class Trees {
                 min: 0,
                 max: 0.2,
                 step: 0.005,
-                index: 9
+                index: 0
             })
                 .on('change', e => uOutline.value = e.value)
         }

@@ -32,6 +32,11 @@ export default [
         type: 'gltfModel',
         path: 'models/terrain.glb',
     },
+    {
+        name: 'terrainSplatTexture',
+        type: 'texture',
+        path: 'textures/terrainSplat.png',
+    },
 
     // GRASS
     {
@@ -83,4 +88,9 @@ export default [
         type: 'texture',
         path: 'textures/noise.png',
     },
+    // {
+    //     name: 'noiseTexture2',
+    //     type: 'texture',
+    //     path: 'textures/noiseTexture.png',
+    // },
 ]
