@@ -30,7 +30,6 @@ export default class Character {
 
     setGeometry() {
         if (this.shape == 'box') {
-            // this.geometry = new THREE.BoxGeometry(1.2, 1.2, 1.2)
             this.geometry = new THREE.BoxGeometry(0.2, 5, 0.2)
         }
         if (this.shape == 'sphere') {
@@ -45,7 +44,6 @@ export default class Character {
     setMaterial() {
         this.material = new THREE.MeshStandardNodeMaterial({
             color: this.color,
-            // wireframe: true,
         })
     }
 
