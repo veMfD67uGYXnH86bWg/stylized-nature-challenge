@@ -45,6 +45,10 @@ body {
     opacity: 1;
 }
 
+.fullscreen-button.debug-active {
+    top: 64px;
+}
+
 .joystick-base {
     position: fixed;
     bottom: 32px;
