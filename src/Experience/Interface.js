@@ -23,6 +23,7 @@ export default class Interface {
     setFullscreenButton() {
         this.fullscreenButton = document.createElement('button')
         this.fullscreenButton.classList.add('fullscreen-button')
+        if (this.experience.debug.active) this.fullscreenButton.classList.add('debug-active')
         this.fullscreenButton.innerHTML = fullscreenIcon
         document.body.appendChild(this.fullscreenButton)
 

@@ -1,4 +1,5 @@
 import * as THREE from 'three/webgpu'
+import Stats from 'stats-gl'
 import Experience from './Experience.js'
 import {Fn, luminance, mix, pass, pow, uniform, vec3} from 'three/tsl'
 import {bloom} from 'three/addons/tsl/display/BloomNode.js'
@@ -48,6 +49,12 @@ export default class Renderer {
 
         this.instance.shadowMap.enabled = true
         this.instance.shadowMap.type = THREE.PCFSoftShadowMap
+
+        if (this.debug.active) {
+            this.stats = new Stats({trackGPU: true})
+            document.body.appendChild(this.stats.dom)
+            this.stats.init(this.instance)
+        }
 
         // Post Processing
         // this.pixelParams = {
@@ -220,6 +227,10 @@ export default class Renderer {
     update() {
         this.instance.render(this.scene, this.camera.instance)
         // this.renderPipeline.render()
+        if (this.debug.active) {
+            this.instance.resolveTimestampsAsync()
+            this.stats.update()
+        }
 
     }
 }
