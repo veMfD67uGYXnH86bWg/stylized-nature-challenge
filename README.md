@@ -22,4 +22,6 @@ Open at http://localhost:5173/ or http://localhost:5173/#debug.
 
 Placeholder character model & animations from [Mixamo](https://www.mixamo.com).
 
-Pleaceholder dragon model from [Riot Games](https://www.riotgames.com/en/legal)
+Pleaceholder dragon model from [Riot Games](https://www.riotgames.com/en/legal).
+
+Grass terrain texture from [Poliigon](https://www.poliigon.com/texture/flat-grass-texture/4585).

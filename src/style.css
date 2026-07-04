@@ -6,6 +6,8 @@
 html,
 body {
     overflow: hidden;
+    touch-action: none;
+    overscroll-behavior: none;
 }
 
 .webgl {
@@ -13,6 +15,35 @@ body {
     top: 0;
     left: 0;
     outline: none;
+    touch-action: none;
+}
+
+.joystick-base {
+    position: fixed;
+    bottom: 32px;
+    left: 32px;
+    width: 128px;
+    height: 128px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    touch-action: none;
+    z-index: 10;
+
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.joystick-knob {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.55);
+    pointer-events: none;
 }
 
 :root {

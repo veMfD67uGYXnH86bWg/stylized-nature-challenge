@@ -163,12 +163,10 @@ export default class Character {
 
     handleMovement() {
         this.previousPosition = this.model.position.clone()
-        this.direction.set(0, 0, 0)
 
-        if (this.input.isPressed('KeyW')) this.direction.z -= 1
-        if (this.input.isPressed('KeyS')) this.direction.z += 1
-        if (this.input.isPressed('KeyA')) this.direction.x -= 1
-        if (this.input.isPressed('KeyD')) this.direction.x += 1
+        const move = this.input.getMove()
+        this.direction.set(move.x, 0, move.z)
+        const running = move.forceRun !== null ? move.forceRun : this.isRunning
 
         if (this.direction.length() > 0) {
 
@@ -181,9 +179,9 @@ export default class Character {
             const delta = ((this.targetRotation - this.model.rotation.y + Math.PI * 3) % (Math.PI * 2)) - Math.PI
             this.model.rotation.y += delta * 0.1
 
-            this.direction2.multiplyScalar(this.params.speed * this.time.delta * (this.isRunning ? this.params.speedFactor : 1) * 0.001)
+            this.direction2.multiplyScalar(this.params.speed * this.time.delta * (running ? this.params.speedFactor : 1) * 0.001)
             this.model.position.add(this.direction2)
-            this.animation.play(this.isRunning ? 'running' : 'walking')
+            this.animation.play(running ? 'running' : 'walking')
             this.isMoving = true
         } else {
             this.animation.play('idle')

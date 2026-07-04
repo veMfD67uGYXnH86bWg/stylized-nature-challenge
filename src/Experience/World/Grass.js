@@ -70,6 +70,10 @@ export default class Grass {
 
         this.terrainMaskPxWidth = img.width
         this.terrainMaskPxHeight = img.height
+        // Precomputed world->pixel scale, so the per-blade lookup is two multiplies
+        // instead of two divisions (it runs count times per moving frame).
+        this.terrainMaskScaleX = img.width / this.terrainMaskWidth
+        this.terrainMaskScaleZ = img.height / this.terrainMaskDepth
         this.terrainMask = new Uint8Array(img.width * img.height)
         for (let p = 0; p < img.width * img.height; p++) {
             const r = pixels[p * 4]
@@ -82,8 +86,8 @@ export default class Grass {
     isGrassArea(x, z) {
         if (!this.terrainMask) return true
 
-        const i = Math.floor((x - this.terrainMaskMinX) / this.terrainMaskWidth * this.terrainMaskPxWidth)
-        const j = Math.floor((z - this.terrainMaskMinZ) / this.terrainMaskDepth * this.terrainMaskPxHeight)
+        const i = Math.floor((x - this.terrainMaskMinX) * this.terrainMaskScaleX)
+        const j = Math.floor((z - this.terrainMaskMinZ) * this.terrainMaskScaleZ)
 
         if (i < 0 || i >= this.terrainMaskPxWidth || j < 0 || j >= this.terrainMaskPxHeight) return false
 
@@ -97,7 +101,8 @@ export default class Grass {
 
         this.params = {
             posY: 0,
-            count: 30000,
+
+            count: this.experience.input.isTouch ? 15000 : 30000,
             spread: 30,
             size: 1.3,
             tiltZ: 0.25,
@@ -157,6 +162,12 @@ export default class Grass {
             this.wrappedPosArray = wrappedPosArray
             this.wrappedPosAttribute = new THREE.InstancedBufferAttribute(wrappedPosArray, 2)
             bladeMesh.geometry.setAttribute('aWrappedPos', this.wrappedPosAttribute)
+
+            this.mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage)
+            this.wrappedPosAttribute.setUsage(THREE.DynamicDrawUsage)
+
+            this.lastCenterX = null
+            this.lastCenterZ = null
 
             this.mesh.instanceMatrix.needsUpdate = true
             this.mesh.instanceColor.needsUpdate = true
@@ -467,25 +478,26 @@ export default class Grass {
 
         const centerX = character.model.position.x
         const centerZ = character.model.position.z
+
+        if (centerX === this.lastCenterX && centerZ === this.lastCenterZ) return
+        this.lastCenterX = centerX
+        this.lastCenterZ = centerZ
+
         const patchSize = this.params.spread
         const half = patchSize * 0.5
+        const posY = this.params.posY
         const flooredMod = (a, b) => a - b * Math.floor(a / b)
 
+        const matrices = this.mesh.instanceMatrix.array
+
         for (let i = 0; i < this.params.count; i++) {
-            const homeX = this.homeX[i]
-            const homeZ = this.homeZ[i]
+            const wrapX = flooredMod(this.homeX[i] - centerX + half, patchSize) - half + centerX
+            const wrapZ = flooredMod(this.homeZ[i] - centerZ + half, patchSize) - half + centerZ
 
-            const wrapX = flooredMod(homeX - centerX + half, patchSize) - half + centerX
-            const wrapZ = flooredMod(homeZ - centerZ + half, patchSize) - half + centerZ
-
-            const scale = this.isGrassArea(wrapX, wrapZ) ? this.params.size : 0
-
-            this.dummy.position.set(wrapX, this.params.posY, wrapZ)
-            this.dummy.rotation.order = 'XZY'
-            this.dummy.rotation.set(0, this.rotationY[i], this.params.tiltZ)
-            this.dummy.scale.setScalar(scale)
-            this.dummy.updateMatrix()
-            this.mesh.setMatrixAt(i, this.dummy.matrix)
+            const o = i * 16
+            matrices[o + 12] = wrapX
+            matrices[o + 13] = this.isGrassArea(wrapX, wrapZ) ? posY : -1000
+            matrices[o + 14] = wrapZ
 
             this.wrappedPosArray[i * 2 + 0] = wrapX
             this.wrappedPosArray[i * 2 + 1] = wrapZ
