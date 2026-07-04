@@ -18,6 +18,33 @@ body {
     touch-action: none;
 }
 
+.fullscreen-button {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: none;
+    color: #ffffff;
+    font-size: 28px;
+    opacity: 0.7;
+    transition: opacity 0.1s ease;
+    filter: drop-shadow(var(--classic-shadow));
+    cursor: pointer;
+    z-index: 10;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.fullscreen-button:hover {
+    opacity: 1;
+}
+
 .joystick-base {
     position: fixed;
     bottom: 32px;
@@ -47,6 +74,7 @@ body {
 }
 
 :root {
+    --classic-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
     --tp-base-background-color: hsla(40, 3%, 90%, 1.00);
     --tp-base-shadow-color: hsla(0, 0%, 0%, 0.30);
     --tp-button-background-color: hsla(40, 3%, 70%, 1.00);
