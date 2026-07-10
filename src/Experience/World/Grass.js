@@ -70,8 +70,6 @@ export default class Grass {
 
         this.terrainMaskPxWidth = img.width
         this.terrainMaskPxHeight = img.height
-        // Precomputed world->pixel scale, so the per-blade lookup is two multiplies
-        // instead of two divisions (it runs count times per moving frame).
         this.terrainMaskScaleX = img.width / this.terrainMaskWidth
         this.terrainMaskScaleZ = img.height / this.terrainMaskDepth
         this.terrainMask = new Uint8Array(img.width * img.height)
@@ -79,19 +77,19 @@ export default class Grass {
             const r = pixels[p * 4]
             const g = pixels[p * 4 + 1]
             const b = pixels[p * 4 + 2]
-            this.terrainMask[p] = (g >= r && g >= b) ? 1 : 0
+            this.terrainMask[p] = (g >= r && g >= b) ? 2 : (r >= b ? 1 : 0)
         }
     }
 
-    isGrassArea(x, z) {
-        if (!this.terrainMask) return true
+    getTerrainClass(x, z) {
+        if (!this.terrainMask) return 2
 
         const i = Math.floor((x - this.terrainMaskMinX) * this.terrainMaskScaleX)
         const j = Math.floor((z - this.terrainMaskMinZ) * this.terrainMaskScaleZ)
 
-        if (i < 0 || i >= this.terrainMaskPxWidth || j < 0 || j >= this.terrainMaskPxHeight) return false
+        if (i < 0 || i >= this.terrainMaskPxWidth || j < 0 || j >= this.terrainMaskPxHeight) return 0
 
-        return this.terrainMask[j * this.terrainMaskPxWidth + i] === 1
+        return this.terrainMask[j * this.terrainMaskPxWidth + i]
     }
 
     setModel() {
@@ -102,7 +100,7 @@ export default class Grass {
         this.params = {
             posY: 0,
 
-            count: this.experience.input.isTouch ? 15000 : 30000,
+            count: this.experience.input.isTouch ? 12000 : 20000,
             spread: 30,
             size: 1.3,
             tiltZ: 0.25,
@@ -121,6 +119,7 @@ export default class Grass {
             this.homeX = new Float32Array(count)
             this.homeZ = new Float32Array(count)
             this.rotationY = new Float32Array(count)
+            this.bladeScaleFactor = new Float32Array(count).fill(1)
 
             const instancePosArray = new Float32Array(count * 3)
             const rotationArray = new Float32Array(count)
@@ -259,9 +258,32 @@ export default class Grass {
 
         const grassColor = mix(uColorA, uColorB, noiseRemap)
 
+        this.healthyParams = {
+            x: -48,
+            z: 43.5,
+            innerRadius: 13.5,
+            outerRadius: 23,
+            color: '#4db54d',
+            strength: 0.75,
+        }
+        this.uHealthyCenter = uniform(new THREE.Vector2(this.healthyParams.x, this.healthyParams.z))
+        this.uHealthyInner = uniform(this.healthyParams.innerRadius)
+        this.uHealthyOuter = uniform(this.healthyParams.outerRadius)
+        this.uHealthyColor = uniform(color(this.healthyParams.color))
+        this.uHealthyStrength = uniform(this.healthyParams.strength)
+
+        const healthyDelta = positionWorld.xz.sub(this.uHealthyCenter).abs()
+        const healthyDist = healthyDelta.x.max(healthyDelta.y)
+        const healthyFactor = float(1)
+            .sub(smoothstep(this.uHealthyInner, this.uHealthyOuter, healthyDist))
+            .mul(this.uHealthyStrength)
+        const finalGrassColor = mix(grassColor, this.uHealthyColor, healthyFactor)
+
         this.material = new THREE.MeshStandardNodeMaterial()
-        this.material.colorNode = grassColor
+        this.material.colorNode = finalGrassColor
         this.material.side = THREE.DoubleSide
+
+        this.experience.world.corruption?.applyTo(this.material)
 
         if (this.debug.active) {
             this.colorTotalityFolder = this.colorFolder.addFolder({title: 'Grass Color (Totality)'})
@@ -283,6 +305,20 @@ export default class Grass {
             this.colorTotalityFolder.addBinding(this.materialParams, 'colorB').on('change', () => {
                 uColorB.value.set(this.materialParams.colorB)
             })
+
+            const healthyFolder = this.colorFolder.addFolder({title: 'Healthy Patch'})
+            healthyFolder.addBinding(this.healthyParams, 'x', {min: -100, max: 100, step: 0.5})
+                .on('change', () => this.uHealthyCenter.value.x = this.healthyParams.x)
+            healthyFolder.addBinding(this.healthyParams, 'z', {min: -100, max: 100, step: 0.5})
+                .on('change', () => this.uHealthyCenter.value.y = this.healthyParams.z)
+            healthyFolder.addBinding(this.healthyParams, 'innerRadius', {min: 0, max: 20, step: 0.1})
+                .on('change', e => this.uHealthyInner.value = e.value)
+            healthyFolder.addBinding(this.healthyParams, 'outerRadius', {min: 0, max: 30, step: 0.1})
+                .on('change', e => this.uHealthyOuter.value = e.value)
+            healthyFolder.addBinding(this.healthyParams, 'color', {label: 'Color'})
+                .on('change', e => this.uHealthyColor.value.set(e.value))
+            healthyFolder.addBinding(this.healthyParams, 'strength', {min: 0, max: 1, step: 0.01})
+                .on('change', e => this.uHealthyStrength.value = e.value)
         }
     }
 
@@ -494,10 +530,28 @@ export default class Grass {
             const wrapX = flooredMod(this.homeX[i] - centerX + half, patchSize) - half + centerX
             const wrapZ = flooredMod(this.homeZ[i] - centerZ + half, patchSize) - half + centerZ
 
+            const terrainClass = this.getTerrainClass(wrapX, wrapZ)
+
             const o = i * 16
             matrices[o + 12] = wrapX
-            matrices[o + 13] = this.isGrassArea(wrapX, wrapZ) ? posY : -1000
+            matrices[o + 13] = terrainClass === 0 ? -1000 : posY
             matrices[o + 14] = wrapZ
+
+            const factor = terrainClass === 1 ? 0.5 : 1
+            const current = this.bladeScaleFactor[i]
+            if (factor !== current) {
+                const ratio = factor / current
+                matrices[o + 0] *= ratio
+                matrices[o + 1] *= ratio
+                matrices[o + 2] *= ratio
+                matrices[o + 4] *= ratio
+                matrices[o + 5] *= ratio
+                matrices[o + 6] *= ratio
+                matrices[o + 8] *= ratio
+                matrices[o + 9] *= ratio
+                matrices[o + 10] *= ratio
+                this.bladeScaleFactor[i] = factor
+            }
 
             this.wrappedPosArray[i * 2 + 0] = wrapX
             this.wrappedPosArray[i * 2 + 1] = wrapZ

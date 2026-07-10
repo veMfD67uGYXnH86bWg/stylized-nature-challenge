@@ -174,10 +174,15 @@ export default class Character {
             this.direction2.applyEuler(new THREE.Euler(0, this.camera.yAngle, 0)) // Adjusts direction depending on camera angle
             this.direction2.normalize()
 
-            // Character rotation animation smoothing
             this.targetRotation = Math.atan2(this.direction2.x, this.direction2.z)
-            const delta = ((this.targetRotation - this.model.rotation.y + Math.PI * 3) % (Math.PI * 2)) - Math.PI
+            const TWO_PI = Math.PI * 2
+            let delta = (this.targetRotation - this.model.rotation.y) % TWO_PI
+            if (delta > Math.PI) delta -= TWO_PI
+            else if (delta < -Math.PI) delta += TWO_PI
             this.model.rotation.y += delta * 0.1
+
+            if (this.model.rotation.y > Math.PI) this.model.rotation.y -= TWO_PI
+            else if (this.model.rotation.y < -Math.PI) this.model.rotation.y += TWO_PI
 
             this.direction2.multiplyScalar(this.params.speed * this.time.delta * (running ? this.params.speedFactor : 1) * 0.001)
             this.model.position.add(this.direction2)

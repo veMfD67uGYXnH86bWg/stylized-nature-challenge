@@ -63,11 +63,11 @@ export default class Renderer {
         //     depthEdgeStrength: uniform(0.4),
         //     pixelAlignedPanning: true
         // }
-        // this.bloomParams = {
-        //     threshold: 0,
-        //     strength: 0,
-        //     radius: 0,
-        // }
+        this.bloomParams = {
+            threshold: 0,
+            strength: 0,
+            radius: 0,
+        }
 
         // this.gradeParams = {
         //     lift: {x: 0, y: 0, z: 0.02},
@@ -148,7 +148,7 @@ export default class Renderer {
             }).on('change', (e) => {
                 this.instance.toneMappingExposure = e.value
             })
-            // this.renderPipelineFolder = this.rendererFolder.addFolder({title: 'Post Processing'})
+            this.renderPipelineFolder = this.rendererFolder.addFolder({title: 'Post Processing'})
 
             /* // Pixel Pass Debug
             this.renderPipelineFolder.addBinding(this.pixelParams.pixelSize, 'value', {
@@ -158,30 +158,30 @@ export default class Renderer {
                 step: 1,
             })*/
 
-            // this.renderPipelineFolder.addBinding(this.bloomParams, 'strength', {
-            //     label: 'Bloom Strength',
-            //     min: 0,
-            //     max: 3,
-            //     step: 0.01,
-            // }).on('change', (e) => {
-            //     bloomPass.strength.value = e.value
-            // })
-            // this.renderPipelineFolder.addBinding(this.bloomParams, 'threshold', {
-            //     label: 'Bloom Threshold',
-            //     min: 0,
-            //     max: 3,
-            //     step: 0.01,
-            // }).on('change', (e) => {
-            //     bloomPass.threshold.value = e.value
-            // })
-            // this.renderPipelineFolder.addBinding(this.bloomParams, 'radius', {
-            //     label: 'Bloom Radius',
-            //     min: 0,
-            //     max: 3,
-            //     step: 0.01,
-            // }).on('change', (e) => {
-            //     bloomPass.radius.value = e.value
-            // })
+            this.renderPipelineFolder.addBinding(this.bloomParams, 'strength', {
+                label: 'Bloom Strength',
+                min: 0,
+                max: 3,
+                step: 0.01,
+            }).on('change', (e) => {
+                bloomPass.strength.value = e.value
+            })
+            this.renderPipelineFolder.addBinding(this.bloomParams, 'threshold', {
+                label: 'Bloom Threshold',
+                min: 0,
+                max: 3,
+                step: 0.01,
+            }).on('change', (e) => {
+                bloomPass.threshold.value = e.value
+            })
+            this.renderPipelineFolder.addBinding(this.bloomParams, 'radius', {
+                label: 'Bloom Radius',
+                min: 0,
+                max: 3,
+                step: 0.01,
+            }).on('change', (e) => {
+                bloomPass.radius.value = e.value
+            })
             //
             // this.gradeFolder = this.rendererFolder.addFolder({title: 'Color Grade'})
             // this.gradeFolder.addBinding(this.gradeParams, 'lift', {

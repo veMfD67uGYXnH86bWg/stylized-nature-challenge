@@ -30,19 +30,31 @@ export default [
     {
         name: 'terrainModel',
         type: 'gltfModel',
-        path: 'models/terrain.glb',
+        path: 'models/terrain3.glb',
     },
     {
         name: 'terrainSplatTexture',
         type: 'texture',
         path: 'textures/terrainSplat.png',
     },
+    {
+        name: 'corruptionMaskTexture',
+        type: 'texture',
+        path: 'textures/corruptionMask.png',
+    },
+
+    // CORRUPTION
+    {
+        name: 'corruptionInteriorTexture',
+        type: 'texture',
+        path: 'textures/corruptionInterior.png',
+    },
 
     // GRASS
     {
         name: 'grassColorTexture',
         type: 'texture',
-        path: 'textures/grass.jpg',
+        path: 'textures/grass.png',
     },
     {
         name: 'grassModel',
@@ -52,7 +64,7 @@ export default [
     {
         name: 'dirtColorTexture',
         type: 'texture',
-        path: 'textures/dirt.jpg',
+        path: 'textures/grass.png',
     },
     {
         name: 'waterColorTexture',
@@ -81,6 +93,18 @@ export default [
         type: 'texture',
         path: 'textures/leaf.png',
     },
+    // BEAM
+    {
+        name: 'beamMiddleTexture',
+        type: 'texture',
+        path: 'textures/beamMiddle.png',
+    },
+    {
+        name: 'beamModel',
+        type: 'gltfModel',
+        path: 'models/lightBeam.glb',
+    },
+
 
     // MISC
     {

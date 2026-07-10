@@ -5,6 +5,7 @@ import Sizes from './utils/Sizes.js'
 import Time from './utils/Time.js'
 import Input from './utils/Input.js'
 import Camera from './Camera.js'
+import GameState from './GameState.js'
 import Renderer from './Renderer.js'
 import World from './World/World.js'
 import Interface from './Interface.js'
@@ -29,6 +30,7 @@ export default class Experience {
         this.sizes = new Sizes()
         this.time = new Time()
         this.input = new Input()
+        this.gameState = new GameState()
         this.scene = new THREE.Scene()
 
         if (this.debug.active) {

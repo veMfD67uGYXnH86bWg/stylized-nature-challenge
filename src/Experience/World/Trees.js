@@ -95,6 +95,8 @@ export default class Trees {
         })
         this.leafMaterial.colorNode = vec4(tex.rgb.mul(shade).mul(tint).mul(noiseColor), tex.a)
 
+        this.experience.world.corruption?.applyTo(this.leafMaterial, {preserveAlpha: true})
+
         const wind = getWind()
         const aTreeRotation = attribute('aTreeRotation', 'float')
         const aTreePosition = attribute('aTreePosition', 'vec3')

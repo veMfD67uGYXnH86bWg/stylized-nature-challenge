@@ -6,6 +6,9 @@ import Terrain from './Terrain.js'
 import Grass from './Grass.js'
 import Dragon from './Dragon.js'
 import Trees from './Trees.js'
+import Corruption from '../shaders/Corruption.js'
+import LightBeam from '../shaders/lightBeam.js'
+
 import * as THREE from 'three/webgpu'
 
 export default class World {
@@ -18,10 +21,12 @@ export default class World {
         this.resources.on('ready', () => {
             this.environment = new Environment()
             this.terrain = new Terrain()
+            this.corruption = new Corruption()
             this.grass = new Grass()
             this.character = new Character()
             this.dragon = new Dragon()
             this.trees = new Trees()
+            this.lightBeam = new LightBeam()
 
             // this.generateShapes()
         })
@@ -55,5 +60,7 @@ export default class World {
             this.grass.update()
         if (this.dragon)
             this.dragon.update()
+        if (this.lightBeam)
+            this.lightBeam.update()
     }
 }
