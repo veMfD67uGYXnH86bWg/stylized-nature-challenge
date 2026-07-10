@@ -30,7 +30,7 @@ export default [
     {
         name: 'terrainModel',
         type: 'gltfModel',
-        path: 'models/terrain3.glb',
+        path: 'models/terrain.glb',
     },
     {
         name: 'terrainSplatTexture',
