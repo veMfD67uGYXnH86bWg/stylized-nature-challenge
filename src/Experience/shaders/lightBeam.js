@@ -280,142 +280,144 @@ export default class LightBeam {
         this.light = new THREE.PointLight(this.params.color, 0, this.params.lightRange)
         this.scene.add(this.light)
 
+        if (this.debug.active) {
+            this.debugFolder.addBinding(this.params, 'scrollSpeed', {
+                min: 0,
+                max: 10,
+                step: 0.01
+            }).on('change', e => this.uScrollSpeed.value = e.value)
+            this.debugFolder.addBinding({coreWidth: 2}, 'coreWidth', {
+                label: 'Core Width',
+                min: 0.1,
+                max: 4,
+                step: 0.05
+            }).on('change', e => this.uCoreWidth.value = e.value)
+            this.debugFolder.addBinding(this.params, 'cleanseRadius', {
+                label: 'Cleanse Radius',
+                min: 0.5,
+                max: 10,
+                step: 0.1
+            })
+            this.debugFolder.addBinding(this.params, 'startOffset', {
+                label: 'Start Offset',
+                min: 0,
+                max: 2,
+                step: 0.01
+            })
+            this.debugFolder.addBinding(this.params, 'haloScale', {
+                label: 'Halo Width',
+                min: 0.1,
+                max: 10,
+                step: 0.05
+            }).on('change', e => this.halo.scale.set(e.value, 1, e.value))
 
-        this.debugFolder.addBinding(this.params, 'scrollSpeed', {
-            min: 0,
-            max: 10,
-            step: 0.01
-        }).on('change', e => this.uScrollSpeed.value = e.value)
-        this.debugFolder.addBinding({coreWidth: 2}, 'coreWidth', {
-            label: 'Core Width',
-            min: 0.1,
-            max: 4,
-            step: 0.05
-        }).on('change', e => this.uCoreWidth.value = e.value)
-        this.debugFolder.addBinding(this.params, 'cleanseRadius', {
-            label: 'Cleanse Radius',
-            min: 0.5,
-            max: 10,
-            step: 0.1
-        })
-        this.debugFolder.addBinding(this.params, 'startOffset', {
-            label: 'Start Offset',
-            min: 0,
-            max: 2,
-            step: 0.01
-        })
-        this.debugFolder.addBinding(this.params, 'haloScale', {
-            label: 'Halo Width',
-            min: 0.1,
-            max: 10,
-            step: 0.05
-        }).on('change', e => this.halo.scale.set(e.value, 1, e.value))
+            const shellFolder = this.debugFolder.addFolder({title: 'Noise Shell'})
+            shellFolder.addBinding(this.params, 'noiseShellScale', {
+                label: 'Width',
+                min: 0.1,
+                max: 10,
+                step: 0.05
+            }).on('change', e => this.noiseShell.scale.set(e.value, 1, e.value))
+            shellFolder.addBinding(this.params, 'noiseScale', {
+                label: 'Scale',
+                min: 0.1,
+                max: 10,
+                step: 0.05
+            }).on('change', e => this.uNoiseScale.value = e.value)
+            shellFolder.addBinding(this.params, 'noiseSpeed', {
+                label: 'Speed',
+                min: 0,
+                max: 30,
+                step: 0.05
+            }).on('change', e => this.uNoiseSpeed.value = e.value)
+            shellFolder.addBinding(this.params, 'noiseTiling', {
+                label: 'Tiling',
+                x: {min: 0.05, max: 10, step: 0.5},
+                y: {min: 0.05, max: 10, step: 0.5},
+                z: {min: 0.05, max: 10, step: 0.5},
+            }).on('change', () => {
+                this.uNoiseTiling.value.set(
+                    this.params.noiseTiling.x,
+                    this.params.noiseTiling.y,
+                    this.params.noiseTiling.z
+                )
+            })
+            shellFolder.addBinding(this.params, 'shellOffset', {
+                label: 'Start Offset',
+                min: 0,
+                max: 2,
+                step: 0.01
+            })
+            shellFolder.addBinding(this.params, 'baseSphereSize', {
+                label: 'Sphere Size',
+                min: 0.05,
+                max: 2,
+                step: 0.01
+            }).on('change', e => this.uBaseSphereSize.value = e.value)
+            shellFolder.addBinding(this.params, 'baseSphereAlpha', {
+                label: 'Sphere Alpha',
+                min: 0,
+                max: 1,
+                step: 0.01
+            }).on('change', e => this.uBaseSphereAlpha.value = e.value)
+            shellFolder.addBinding({solid: false}, 'solid', {label: 'Sphere Debug'})
+                .on('change', e => this.uSphereDebugSolid.value = e.value ? 1 : 0)
+            shellFolder.addBinding(this.params, 'coreSphereSize', {
+                label: 'Core Sphere Size',
+                min: 0.05,
+                max: 2,
+                step: 0.01
+            })
+            shellFolder.addBinding(this.params, 'coreSphereAlpha', {
+                label: 'Core Sphere Alpha',
+                min: 0,
+                max: 1,
+                step: 0.01
+            }).on('change', e => this.uCoreSphereAlpha.value = e.value)
+            shellFolder.addBinding(this.params, 'corePulseAmount', {
+                label: 'Pulse Amount',
+                min: 0,
+                max: 0.5,
+                step: 0.01
+            })
+            shellFolder.addBinding(this.params, 'corePulseSpeed', {
+                label: 'Pulse Speed',
+                min: 0,
+                max: 20,
+                step: 0.1
+            })
+            shellFolder.addBinding(this.params, 'twist', {
+                label: 'Twist',
+                min: -1,
+                max: 1,
+                step: 0.001
+            }).on('change', e => this.uTwist.value = e.value)
+            shellFolder.addBinding(this.params, 'twistWave', {
+                label: 'Twist Wave',
+                min: 0,
+                max: 5,
+                step: 0.05
+            }).on('change', e => this.uTwistWave.value = e.value)
+            shellFolder.addBinding(this.params, 'twistWaveFrequency', {
+                label: 'Wave Frequency',
+                min: 0,
+                max: 5,
+                step: 0.05
+            }).on('change', e => this.uTwistWaveFrequency.value = e.value)
+            shellFolder.addBinding(this.params, 'twistSpeed', {
+                label: 'Twist Speed',
+                min: 0,
+                max: 10,
+                step: 0.1
+            }).on('change', e => this.uTwistSpeed.value = e.value)
+            shellFolder.addBinding(this.params, 'noiseThreshold', {
+                label: 'Threshold',
+                min: -1,
+                max: 1,
+                step: 0.01
+            }).on('change', e => this.uNoiseThreshold.value = e.value)
+        }
 
-        const shellFolder = this.debugFolder.addFolder({title: 'Noise Shell'})
-        shellFolder.addBinding(this.params, 'noiseShellScale', {
-            label: 'Width',
-            min: 0.1,
-            max: 10,
-            step: 0.05
-        }).on('change', e => this.noiseShell.scale.set(e.value, 1, e.value))
-        shellFolder.addBinding(this.params, 'noiseScale', {
-            label: 'Scale',
-            min: 0.1,
-            max: 10,
-            step: 0.05
-        }).on('change', e => this.uNoiseScale.value = e.value)
-        shellFolder.addBinding(this.params, 'noiseSpeed', {
-            label: 'Speed',
-            min: 0,
-            max: 30,
-            step: 0.05
-        }).on('change', e => this.uNoiseSpeed.value = e.value)
-        shellFolder.addBinding(this.params, 'noiseTiling', {
-            label: 'Tiling',
-            x: {min: 0.05, max: 10, step: 0.5},
-            y: {min: 0.05, max: 10, step: 0.5},
-            z: {min: 0.05, max: 10, step: 0.5},
-        }).on('change', () => {
-            this.uNoiseTiling.value.set(
-                this.params.noiseTiling.x,
-                this.params.noiseTiling.y,
-                this.params.noiseTiling.z
-            )
-        })
-        shellFolder.addBinding(this.params, 'shellOffset', {
-            label: 'Start Offset',
-            min: 0,
-            max: 2,
-            step: 0.01
-        })
-        shellFolder.addBinding(this.params, 'baseSphereSize', {
-            label: 'Sphere Size',
-            min: 0.05,
-            max: 2,
-            step: 0.01
-        }).on('change', e => this.uBaseSphereSize.value = e.value)
-        shellFolder.addBinding(this.params, 'baseSphereAlpha', {
-            label: 'Sphere Alpha',
-            min: 0,
-            max: 1,
-            step: 0.01
-        }).on('change', e => this.uBaseSphereAlpha.value = e.value)
-        shellFolder.addBinding({solid: false}, 'solid', {label: 'Sphere Debug'})
-            .on('change', e => this.uSphereDebugSolid.value = e.value ? 1 : 0)
-        shellFolder.addBinding(this.params, 'coreSphereSize', {
-            label: 'Core Sphere Size',
-            min: 0.05,
-            max: 2,
-            step: 0.01
-        })
-        shellFolder.addBinding(this.params, 'coreSphereAlpha', {
-            label: 'Core Sphere Alpha',
-            min: 0,
-            max: 1,
-            step: 0.01
-        }).on('change', e => this.uCoreSphereAlpha.value = e.value)
-        shellFolder.addBinding(this.params, 'corePulseAmount', {
-            label: 'Pulse Amount',
-            min: 0,
-            max: 0.5,
-            step: 0.01
-        })
-        shellFolder.addBinding(this.params, 'corePulseSpeed', {
-            label: 'Pulse Speed',
-            min: 0,
-            max: 20,
-            step: 0.1
-        })
-        shellFolder.addBinding(this.params, 'twist', {
-            label: 'Twist',
-            min: -1,
-            max: 1,
-            step: 0.001
-        }).on('change', e => this.uTwist.value = e.value)
-        shellFolder.addBinding(this.params, 'twistWave', {
-            label: 'Twist Wave',
-            min: 0,
-            max: 5,
-            step: 0.05
-        }).on('change', e => this.uTwistWave.value = e.value)
-        shellFolder.addBinding(this.params, 'twistWaveFrequency', {
-            label: 'Wave Frequency',
-            min: 0,
-            max: 5,
-            step: 0.05
-        }).on('change', e => this.uTwistWaveFrequency.value = e.value)
-        shellFolder.addBinding(this.params, 'twistSpeed', {
-            label: 'Twist Speed',
-            min: 0,
-            max: 10,
-            step: 0.1
-        }).on('change', e => this.uTwistSpeed.value = e.value)
-        shellFolder.addBinding(this.params, 'noiseThreshold', {
-            label: 'Threshold',
-            min: -1,
-            max: 1,
-            step: 0.01
-        }).on('change', e => this.uNoiseThreshold.value = e.value)
     }
 
     update() {
