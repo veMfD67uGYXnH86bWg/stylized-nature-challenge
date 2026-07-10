@@ -38,6 +38,7 @@ export default class Dragon {
 
         this.model.traverse((child) => {
             if (child instanceof THREE.Mesh) {
+                this.experience.world.corruption?.applyTo(child.material)
                 child.castShadow = true
             }
         })
