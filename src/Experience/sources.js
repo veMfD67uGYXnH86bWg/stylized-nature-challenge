@@ -117,4 +117,16 @@ export default [
     //     type: 'texture',
     //     path: 'textures/noiseTexture.png',
     // },
+
+    // SOUNDS
+    // {
+    //     name: 'beamLoopSound',
+    //     type: 'audio',
+    //     path: 'sounds/beamLoop.ogg',
+    // },
+    // {
+    //     name: 'beamEndSound',
+    //     type: 'audio',
+    //     path: 'sounds/beamEnd.ogg',
+    // },
 ]

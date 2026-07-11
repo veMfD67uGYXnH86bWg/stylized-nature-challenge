@@ -19,6 +19,8 @@ export default class Environment {
         this.setSunLight()
         this.setAmbientLight()
         this.setEnvironmentMap()
+
+        console.log('Loaded Environment')
     }
 
     setSunLight() {
@@ -95,7 +97,6 @@ export default class Environment {
         this.ambientLight = new THREE.AmbientLight(0xffffff, 1.0)
         this.scene.add(this.ambientLight)
 
-        console.log('Loaded Environment')
         if (this.debug.active) {
             this.lightFolder.addBinding(this.ambientLight, 'intensity', {
                 label: 'Ambient Intensity',

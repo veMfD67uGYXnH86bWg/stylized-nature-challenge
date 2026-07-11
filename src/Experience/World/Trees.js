@@ -261,7 +261,6 @@ export default class Trees {
         trunkMesh.castShadow = true
         leafMesh.castShadow = true
         this.scene.add(trunkMesh, outlineMesh, leafMesh)
-        console.log(`Loaded ${trees.length} trees`)
 
         if (this.debug.active) {
             this.debugFolder.addBinding({v: 0.01}, 'v', {
@@ -273,5 +272,7 @@ export default class Trees {
             })
                 .on('change', e => uOutline.value = e.value)
         }
+
+        console.log(`Loaded ${trees.length} trees`)
     }
 }

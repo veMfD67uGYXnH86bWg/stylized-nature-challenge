@@ -21,6 +21,8 @@ export default class Terrain {
 
         this.setTextures()
         this.setModel()
+
+        console.log('Loaded Terrain')
     }
 
     setWrapColorSpace(texture) {
@@ -104,7 +106,5 @@ export default class Terrain {
                 child.material = mat
             }
         })
-
-        console.log('Loaded Terrain')
     }
 }

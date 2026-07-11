@@ -1,6 +1,7 @@
 import * as THREE from 'three/webgpu'
 import Experience from '../Experience.js'
 import Outline from './Outline.js'
+import {DRAGON_LINES} from '../dialogues.js'
 
 export default class Dragon {
     constructor() {
@@ -11,6 +12,7 @@ export default class Dragon {
         this.world = this.experience.world
         this.debug = this.experience.debug
         this.resource = this.resources.items.dragonModel
+        this.interactions = this.experience.interactions
 
         if (this.debug.active) {
             this.debugFolder = this.debug.ui.addFolder(
@@ -24,6 +26,9 @@ export default class Dragon {
         this.setPosition()
         this.setAnimation()
         this.setBoundingBox()
+        this.setInteractions()
+
+        console.log('Loaded Dragon (Placeholder)')
     }
 
 
@@ -44,7 +49,6 @@ export default class Dragon {
         })
 
         this.outline = new Outline({thickness: this.params.outline}).add(this.model)
-        console.log('Loaded Dragon Model (Placeholder)')
 
         if (this.debug.active) {
             this.debugFolder.addBinding(this.params, 'outline', {label: 'Outline', min: 0.05, max: 3, step: 0.01})
@@ -115,6 +119,38 @@ export default class Dragon {
         this.animation.actions.current.play()
 
         this.playAnimation()
+    }
+
+    setInteractions() {
+        this.interactions.add({
+            target: this.model,
+            radius: 4,
+            prompt: 'Talk',
+            onInteract: () => {
+                const gameState = this.experience.gameState
+                const dialogue = this.experience.dialogue
+
+                if (!gameState.hasBeam()) {
+                    // first meeting: the gift
+                    dialogue.open({
+                        speaker: 'Dragon',
+                        lines: ['The forest is dying, little one.', 'Take a fragment of my light.'],
+                        onComplete: () => gameState.grantBeam(),
+                    })
+                } else if (gameState.beamLevel === 1) {
+                    // repeat visit before any upgrades
+                    dialogue.open({
+                        speaker: 'Dragon',
+                        lines: ['Go. The forest waits.'],
+                    })
+                } else {
+                    dialogue.open({
+                        speaker: 'Dragon',
+                        lines: ['Your light burns brighter than mine now.'],
+                    })
+                }
+            }
+        })
     }
 
     update() {

@@ -25,6 +25,7 @@ export default class LightBeam {
         this.input = this.experience.input
         this.sizes = this.experience.sizes
         this.time = this.experience.time
+        this.resources = this.experience.resources
 
         this.params = {
             maxDistance: 6,
@@ -96,11 +97,14 @@ export default class LightBeam {
         if (this.debug.active) {
             this.debugFolder = this.debug.ui.addFolder({
                 title: 'Light Beam',
-                expanded: true,
+                expanded: false,
             })
         }
 
         this.setMesh()
+        this.setSound()
+
+        console.log('Loaded Lightbeam')
     }
 
     normalizeHaloGeometry(geometry) {
@@ -417,6 +421,10 @@ export default class LightBeam {
                 step: 0.01
             }).on('change', e => this.uNoiseThreshold.value = e.value)
         }
+
+    }
+
+    setSound() {
 
     }
 

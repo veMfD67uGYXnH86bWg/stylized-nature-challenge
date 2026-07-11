@@ -36,6 +36,8 @@ export default class Corruption {
         this.setTerrain()
         this.setDebugPlane()
         this.setDebug()
+
+        console.log('Loaded Corruption')
     }
 
 
@@ -393,8 +395,6 @@ export default class Corruption {
         this.debugPlane.position.set(0, 0.2, 0)
         this.debugPlane.visible = false
         this.scene.add(this.debugPlane)
-
-        console.log('Loaded Corruption')
     }
 
     setDebug() {

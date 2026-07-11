@@ -39,6 +39,8 @@ export default class Character {
         window.addEventListener('keydown', (e) => {
             if (e.code === 'ShiftLeft') this.isRunning = !this.isRunning
         })
+
+        console.log('Loaded Character')
     }
 
     setGeometry() {
@@ -91,8 +93,6 @@ export default class Character {
             this.debugFolder.addBinding(this.params, 'outline', {label: 'Outline', min: 0, max: 0.1, step: 0.001})
                 .on('change', e => this.outline.uThickness.value = e.value)
         }
-
-        console.log('Loaded Character Model')
     }
 
     setPosition() {

@@ -10,6 +10,8 @@ import Renderer from './Renderer.js'
 import World from './World/World.js'
 import Interface from './Interface.js'
 import Resources from './utils/Resources.js'
+import Interactions from './utils/Interactions.js'
+import Dialogue from './utils/Dialogue.js'
 
 import sources from './sources.js'
 
@@ -31,7 +33,10 @@ export default class Experience {
         this.time = new Time()
         this.input = new Input()
         this.gameState = new GameState()
+        this.interactions = new Interactions()
+        this.dialogue = new Dialogue()
         this.scene = new THREE.Scene()
+
 
         if (this.debug.active) {
             this.axesHelper = new THREE.AxesHelper(2)
@@ -41,6 +46,10 @@ export default class Experience {
 
         this.resources = new Resources(sources)
         this.camera = new Camera()
+
+        // this.listener = new THREE.AudioListener()
+        // this.camera.instance.add(this.listener)
+
         this.renderer = new Renderer()
         this.world = new World()
         this.interface = new Interface()
@@ -66,6 +75,7 @@ export default class Experience {
     update() {
         this.camera.update()
         this.world.update()
+        this.interactions.update()
         this.renderer.update()
     }
 

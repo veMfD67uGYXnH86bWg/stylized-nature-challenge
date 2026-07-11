@@ -18,6 +18,12 @@ export default class Interface {
         if (document.documentElement.requestFullscreen) {
             this.setFullscreenButton()
         }
+
+        this.keyHint = document.createElement('div')
+        this.keyHint.classList.add('key-hint')
+        if (this.experience.debug.active) this.keyHint.classList.add('debug-active')
+        this.keyHint.textContent = 'F'
+        document.body.appendChild(this.keyHint)
     }
 
     setFullscreenButton() {

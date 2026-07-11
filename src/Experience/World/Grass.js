@@ -43,6 +43,8 @@ export default class Grass {
         this.bakeTerrainMask()
         this.setModel()
         this.setWind()
+
+        console.log('Loaded Grass')
     }
 
     bakeTerrainMask() {
@@ -178,8 +180,6 @@ export default class Grass {
 
         this.rebuildGrass = rebuild
         rebuild()
-
-        console.log('Loaded Grass')
 
         if (this.debug.active) {
             this.colorSingleFolder = this.colorFolder.addFolder({title: 'Individual Color (Per Blade)'})
