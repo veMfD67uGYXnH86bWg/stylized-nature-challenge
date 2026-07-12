@@ -25,7 +25,6 @@ export default class Corruption {
         this.debug = this.experience.debug
         this.input = this.experience.input
 
-
         this.corruptionMode = this.input.isTouch ? 'rtt' : 'hybrid' // 'direct'
 
         if (this.debug.active) {

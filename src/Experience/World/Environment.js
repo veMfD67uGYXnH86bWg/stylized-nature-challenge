@@ -19,6 +19,7 @@ export default class Environment {
         this.setSunLight()
         this.setAmbientLight()
         this.setEnvironmentMap()
+        this.setAmbientSound()
 
         console.log('Loaded Environment')
     }
@@ -137,6 +138,30 @@ export default class Environment {
                 max: 4,
                 step: 0.001,
             }).on('change', () => this.environmentMap.updateMaterials())
+        }
+    }
+
+    setAmbientSound() {
+        this.ambientSound = new THREE.Audio(this.experience.listener)
+        this.ambientSound.setBuffer(this.resources.items.ambientSound)
+        this.ambientSound.setLoop(true)
+        this.ambientSound.setVolume(0.3)
+
+        const start = () => {
+            if (this.ambientSound.context.state === 'suspended') this.ambientSound.context.resume()
+            if (!this.ambientSound.isPlaying) this.ambientSound.play()
+        }
+        window.addEventListener('pointerdown', start, {once: true})
+        window.addEventListener('keydown', start, {once: true})
+
+        if (this.debug.active) {
+            this.soundsFolder = this.debugFolder.addFolder({title: 'Sounds'})
+            this.soundsFolder.addBinding({sound: 0.4}, 'sound', {
+                label: 'Ambient sound',
+                min: 0,
+                max: 1,
+                step: 0.001,
+            }).on('change', (e) => this.ambientSound.setVolume(e.value))
         }
     }
 

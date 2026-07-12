@@ -47,8 +47,8 @@ export default class Experience {
         this.resources = new Resources(sources)
         this.camera = new Camera()
 
-        // this.listener = new THREE.AudioListener()
-        // this.camera.instance.add(this.listener)
+        this.listener = new THREE.AudioListener()
+        this.camera.instance.add(this.listener)
 
         this.renderer = new Renderer()
         this.world = new World()

@@ -428,7 +428,31 @@ export default class LightBeam {
     }
 
     setSound() {
+        const createSound = (bufferName, loop) => {
+            const sound = new THREE.PositionalAudio(this.experience.listener)
+            sound.setBuffer(this.resources.items[bufferName])
+            sound.setLoop(loop)
+            sound.setRefDistance(3)
+            this.mesh.add(sound)
+            return sound
+        }
 
+        this.startSound = createSound('beamStartSound', false)
+        this.startSound.setVolume(0.6)
+        this.loopSound = createSound('beamLoopSound', true)
+        this.loopSound.setVolume(0.6)
+        this.endSound = createSound('beamEndSound', false)
+        this.endSound.setVolume(0.6)
+
+        this.startSound.onEnded = () => {
+            this.startSound.isPlaying = false
+            const stillFiring = this.activatedAt !== null && this.releasedAt === null
+            if (stillFiring && !this.loopSound.isPlaying) this.loopSound.play()
+        }
+
+        window.addEventListener('keydown', () => {
+            if (this.loopSound.context.state === 'suspended') this.loopSound.context.resume()
+        }, {once: true})
     }
 
     update() {
@@ -440,26 +464,40 @@ export default class LightBeam {
 
         let grow
         if (firing) {
-            if (this.activatedAt === null) this.activatedAt = this.time.elapsed
+            if (this.activatedAt === null) {
+                this.activatedAt = this.time.elapsed
+                if (this.endSound.isPlaying) this.endSound.stop()
+                if (this.startSound.isPlaying) this.startSound.stop()
+                this.startSound.play()
+            }
             if (this.releasedAt !== null) {
                 const s = Math.min((this.time.elapsed - this.releasedAt) / (this.params.shrinkDuration * 1000), 1)
                 const current = this.growAtRelease * (1 - s * s * s)
                 const t = 1 - Math.cbrt(1 - current)
                 this.activatedAt = this.time.elapsed - t * this.params.growDuration * 1000
                 this.releasedAt = null
+                if (this.endSound.isPlaying) this.endSound.stop()
+                if (!this.startSound.isPlaying && !this.loopSound.isPlaying) this.loopSound.play()
             }
             const t = Math.min((this.time.elapsed - this.activatedAt) / (this.params.growDuration * 1000), 1)
             grow = 1 - Math.pow(1 - t, 3)
             this.growAtRelease = grow
         } else {
             if (this.activatedAt === null) return
-            if (this.releasedAt === null) this.releasedAt = this.time.elapsed
+            if (this.releasedAt === null) {
+                this.releasedAt = this.time.elapsed
+                if (this.startSound.isPlaying) this.startSound.stop()
+                if (this.loopSound.isPlaying) this.loopSound.stop()
+                if (this.endSound.isPlaying) this.endSound.stop()
+                this.endSound.play()
+            }
             const s = Math.min((this.time.elapsed - this.releasedAt) / (this.params.shrinkDuration * 1000), 1)
             if (s >= 1) {
                 this.mesh.visible = false
                 this.baseSphere.visible = false
                 this.coreSphere.visible = false
                 this.light.intensity = 0
+                if (this.loopSound.isPlaying) this.loopSound.stop()
                 this.activatedAt = null
                 this.releasedAt = null
                 return

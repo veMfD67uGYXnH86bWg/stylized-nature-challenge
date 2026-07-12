@@ -40,7 +40,7 @@ export default class Terrain {
 
     setTextures() {
         [this.tilingUniformGrass, this.tiledUvGrass, this.grassColor] = this.createTexture(0.09, 'grass');
-        [this.tilingUniformDirt, this.tiledUvDirt, this.dirtColor] = this.createTexture(0.09, 'dirt');
+        [this.tilingUniformDirt, this.tiledUvDirt, this.dirtColor] = this.createTexture(0.09, 'grass');
         [this.tilingUniformWater, this.tiledUvWater, this.waterColor] = this.createTexture(0.09, 'water');
 
         this.params = {tiledUvGrass: 0.09, tiledUvDirt: 0.09, tiledUvWater: 0.09, edgeSoftness: 0.05}

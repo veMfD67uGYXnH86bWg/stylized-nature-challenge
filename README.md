@@ -24,4 +24,6 @@ Placeholder character model & animations from [Mixamo](https://www.mixamo.com).
 
 Pleaceholder dragon model from [Riot Games](https://www.riotgames.com/en/legal).
 
-Grass terrain texture from [Poliigon](https://www.poliigon.com/texture/flat-grass-texture/4585).
+Lightbeam sound effect from [Gearpile on Pixabay](https://pixabay.com/sound-effects/nature-fire-onset-1-386711/).
+
+Ambient sound from [rzalmanialmani on Pixabay](https://pixabay.com/sound-effects/night-sound-frog-sound-8907/).

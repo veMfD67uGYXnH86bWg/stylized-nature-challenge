@@ -62,11 +62,6 @@ export default [
         path: 'models/grass.glb',
     },
     {
-        name: 'dirtColorTexture',
-        type: 'texture',
-        path: 'textures/grass.png',
-    },
-    {
         name: 'waterColorTexture',
         type: 'texture',
         path: 'textures/water.jpg',
@@ -105,6 +100,27 @@ export default [
         path: 'models/lightBeam.glb',
     },
 
+    // SOUNDS
+    {
+        name: 'beamStartSound',
+        type: 'audio',
+        path: 'sounds/beamStart.ogg',
+    },
+    {
+        name: 'beamLoopSound',
+        type: 'audio',
+        path: 'sounds/beamLoop.ogg',
+    },
+    {
+        name: 'beamEndSound',
+        type: 'audio',
+        path: 'sounds/beamEnd.ogg',
+    },
+    {
+        name: 'ambientSound',
+        type: 'audio',
+        path: 'sounds/ambient.ogg',
+    },
 
     // MISC
     {
@@ -112,21 +128,4 @@ export default [
         type: 'texture',
         path: 'textures/noise.png',
     },
-    // {
-    //     name: 'noiseTexture2',
-    //     type: 'texture',
-    //     path: 'textures/noiseTexture.png',
-    // },
-
-    // SOUNDS
-    // {
-    //     name: 'beamLoopSound',
-    //     type: 'audio',
-    //     path: 'sounds/beamLoop.ogg',
-    // },
-    // {
-    //     name: 'beamEndSound',
-    //     type: 'audio',
-    //     path: 'sounds/beamEnd.ogg',
-    // },
 ]
