@@ -1,5 +1,6 @@
 export default class Joystick {
-    constructor() {
+    constructor({right = false} = {}) {
+        this.right = right
         this.vector = {x: 0, y: 0}
         this.magnitude = 0
         this.active = false
@@ -14,6 +15,7 @@ export default class Joystick {
     setElements() {
         this.base = document.createElement('div')
         this.base.classList.add('joystick-base')
+        if (this.right) this.base.classList.add('joystick-right')
 
         this.knob = document.createElement('div')
         this.knob.classList.add('joystick-knob')

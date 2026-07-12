@@ -89,6 +89,9 @@ export default class LightBeam {
         this.direction = new THREE.Vector3()
         this.up = new THREE.Vector3(0, 1, 0)
         this.cleansePoint = new THREE.Vector3()
+
+        this.downDirection = new THREE.Vector3(0, -1, 0)
+        this.aimOrigin = new THREE.Vector3()
         this.toCamera = new THREE.Vector3()
         this.quadRight = new THREE.Vector3()
         this.quadNormal = new THREE.Vector3()
@@ -432,8 +435,11 @@ export default class LightBeam {
         const character = this.experience.world.character
         if (!character) return
 
+        const beamAim = this.input.getBeamAim()
+        const firing = this.input.isPressed('KeyF') || beamAim.active
+
         let grow
-        if (this.input.isPressed('KeyF')) {
+        if (firing) {
             if (this.activatedAt === null) this.activatedAt = this.time.elapsed
             if (this.releasedAt !== null) {
                 const s = Math.min((this.time.elapsed - this.releasedAt) / (this.params.shrinkDuration * 1000), 1)
@@ -464,16 +470,31 @@ export default class LightBeam {
         this.origin.copy(character.model.position)
         this.origin.y += this.params.chestHeight
 
-        this.raycaster.setFromCamera(this.mouseNdc, this.camera.instance)
-        const hits = this.raycaster.intersectObject(this.experience.world.terrain.model, true)
-        if (hits.length === 0) {
-            this.mesh.visible = false
-            this.baseSphere.visible = false
-            this.coreSphere.visible = false
-            this.light.intensity = 0
-            return
+        if (beamAim.active) {
+
+            const aimDistance = Math.max(beamAim.magnitude, 0.3) * this.params.maxDistance
+            this.target.set(
+                character.model.position.x + beamAim.x * aimDistance,
+                0,
+                character.model.position.z + beamAim.z * aimDistance
+            )
+
+            this.aimOrigin.set(this.target.x, character.model.position.y + 20, this.target.z)
+            this.raycaster.set(this.aimOrigin, this.downDirection)
+            const downHits = this.raycaster.intersectObject(this.experience.world.terrain.model, true)
+            this.target.y = downHits.length > 0 ? downHits[0].point.y : character.model.position.y
+        } else {
+            this.raycaster.setFromCamera(this.mouseNdc, this.camera.instance)
+            const hits = this.raycaster.intersectObject(this.experience.world.terrain.model, true)
+            if (hits.length === 0) {
+                this.mesh.visible = false
+                this.baseSphere.visible = false
+                this.coreSphere.visible = false
+                this.light.intensity = 0
+                return
+            }
+            this.target.copy(hits[0].point)
         }
-        this.target.copy(hits[0].point)
 
         this.direction.subVectors(this.target, this.origin)
         const length = this.direction.length()

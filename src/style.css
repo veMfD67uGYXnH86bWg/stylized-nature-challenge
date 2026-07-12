@@ -116,10 +116,15 @@ body {
     opacity: 0.8;
 }
 
+.joystick-base.joystick-right {
+    left: auto;
+    right: 72px;
+}
+
 .joystick-base {
     position: fixed;
-    bottom: 32px;
-    left: 32px;
+    bottom: 72px;
+    left: 72px;
     width: 128px;
     height: 128px;
     border-radius: 50%;
