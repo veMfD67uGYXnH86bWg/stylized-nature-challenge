@@ -27,9 +27,10 @@ export default class GrassShader {
         this.scene = this.experience.scene
         this.resources = this.experience.resources
         this.debug = this.experience.debug
+        this.input = this.experience.input
 
         this.params = {
-            count: 25000,
+            count: this.input.isTouch ? 12500 : 25000,
             spread: 15,
             tiltZ: 0.25,
 
