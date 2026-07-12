@@ -262,6 +262,11 @@ export default class Trees {
         leafMesh.castShadow = true
         this.scene.add(trunkMesh, outlineMesh, leafMesh)
 
+        // perf debug
+        this.trunkMesh = trunkMesh
+        this.outlineMesh = outlineMesh
+        this.leafMesh = leafMesh
+
         if (this.debug.active) {
             this.debugFolder.addBinding({v: 0.01}, 'v', {
                 label: 'trunkOutline',

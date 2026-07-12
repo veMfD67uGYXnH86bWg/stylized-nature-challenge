@@ -90,8 +90,10 @@ body {
     font-size: 16px;
     filter: drop-shadow(var(--classic-shadow));
     z-index: 10;
-    pointer-events: none;
+    cursor: pointer;
+    touch-action: manipulation;
     user-select: none;
+    -webkit-user-select: none;
 }
 
 .dialogue-box {

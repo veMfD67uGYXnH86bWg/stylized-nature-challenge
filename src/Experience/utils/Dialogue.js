@@ -14,8 +14,9 @@ export default class Dialogue {
         window.addEventListener('keydown', (event) => {
             if (this.isOpen && event.code === 'KeyE') this.next()
         })
-        this.box.addEventListener('click', () => {
-            if (this.isOpen) this.next()
+
+        window.addEventListener('pointerdown', () => {
+            if (this.isOpen && performance.now() - this.openedAt > 200) this.next()
         })
     }
 
@@ -36,6 +37,7 @@ export default class Dialogue {
 
     open({speaker = '', lines, onComplete = null}) {
         this.isOpen = true
+        this.openedAt = performance.now()
         this.lines = lines
         this.lineIndex = 0
         this.onComplete = onComplete

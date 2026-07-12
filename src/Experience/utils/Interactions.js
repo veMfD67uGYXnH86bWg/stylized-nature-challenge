@@ -24,6 +24,10 @@ export default class Interactions {
         this.promptElement.classList.add('interaction-prompt')
         this.promptElement.style.display = 'none'
         document.body.appendChild(this.promptElement)
+
+        this.promptElement.addEventListener('pointerdown', () => {
+            if (this.current) this.current.onInteract()
+        })
     }
 
     update() {
@@ -49,7 +53,9 @@ export default class Interactions {
         }
 
         if (this.current) {
-            this.promptElement.textContent = `E - ${this.current.prompt}`
+            this.promptElement.textContent = this.input.isTouch
+                ? this.current.prompt
+                : `E - ${this.current.prompt}`
             this.promptElement.style.display = 'block'
         } else {
             this.promptElement.style.display = 'none'

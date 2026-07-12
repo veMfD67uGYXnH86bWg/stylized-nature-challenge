@@ -10,6 +10,7 @@ import {
     texture,
     time,
     uniform,
+    uv,
     vec2,
     vec3,
     vec4
@@ -22,6 +23,10 @@ export default class Corruption {
         this.scene = this.experience.scene
         this.terrain = this.experience.world.terrain
         this.debug = this.experience.debug
+        this.input = this.experience.input
+
+
+        this.corruptionMode = this.input.isTouch ? 'rtt' : 'hybrid' // 'direct'
 
         if (this.debug.active) {
             this.debugFolder = this.debug.ui.addFolder({
@@ -311,21 +316,16 @@ export default class Corruption {
         this.uMaskMin = uniform(new THREE.Vector2(this.maskMinX, this.maskMinZ))
         this.uMaskSize = uniform(new THREE.Vector2(this.maskWidth, this.maskDepth))
 
-        const p = positionWorld.xz
-
-        const fbm = (pos, octaves) => {
-            let result = null
-            let frequency = 1
-            let amplitude = 0.5
-            for (let i = 0; i < octaves; i++) {
-                const octave = mx_noise_float(pos.mul(frequency)).mul(amplitude)
-                result = result ? result.add(octave) : octave
-                frequency *= 2
-                amplitude *= 0.5
-            }
-            return result
+        if (this.corruptionMode === 'rtt') {
+            this.setShaderRTT()
+        } else if (this.corruptionMode === 'hybrid') {
+            this.setShaderHybrid()
+        } else {
+            this.setShaderDirect()
         }
+    }
 
+    buildInterior(p) {
         const warpX = mx_noise_float(vec3(p.mul(this.uWarpFrequency), time.mul(this.uWarpSpeed)))
         const warpY = mx_noise_float(vec3(p.mul(this.uWarpFrequency).add(100), time.mul(this.uWarpSpeed)))
         const warp = vec2(warpX, warpY).mul(this.uWarpStrength)
@@ -341,10 +341,22 @@ export default class Corruption {
 
         const layerA = sampleLayer(pJittered, this.uScale, [1, 0.3])
         const layerB = sampleLayer(pJittered, this.uScale.mul(2.3), [-0.5, -1])
-        this.nebulaNode = layerA.add(layerB.mul(0.5))
+        return layerA.add(layerB.mul(0.5))
+    }
 
-        this.interiorNode = this.nebulaNode
-        this.emissiveNode = this.nebulaNode.mul(this.nebulaNode).mul(this.uStarBoost)
+    buildCoverage(p) {
+        const fbm = (pos, octaves) => {
+            let result = null
+            let frequency = 1
+            let amplitude = 0.5
+            for (let i = 0; i < octaves; i++) {
+                const octave = mx_noise_float(pos.mul(frequency)).mul(amplitude)
+                result = result ? result.add(octave) : octave
+                frequency *= 2
+                amplitude *= 0.5
+            }
+            return result
+        }
 
         const edgeWarpX = mx_noise_float(vec3(p.mul(this.uEdgeWarpFrequency), time.mul(this.uEdgeWarpSpeed)))
         const edgeWarpZ = mx_noise_float(vec3(p.mul(this.uEdgeWarpFrequency).add(50), time.mul(this.uEdgeWarpSpeed).add(13)))
@@ -355,12 +367,71 @@ export default class Corruption {
 
         const ridge = float(1).sub(fbm(vec3(p.mul(this.uStrandScale), time.mul(this.uStrandSpeed)), 1).abs().mul(2))
         const strandField = smoothstep(float(1).sub(this.uStrandWidth), 1, ridge)
-        const m = maskValue.mul(mix(float(1), strandField, this.uStrandInfluence))
+        return maskValue.mul(mix(float(1), strandField, this.uStrandInfluence))
+    }
+
+    finishNodes(nebula, m) {
+        this.nebulaNode = nebula
+        this.interiorNode = nebula
+        this.emissiveNode = nebula.mul(nebula).mul(this.uStarBoost)
 
         this.insideNode = smoothstep(this.uRimMid, this.uRimHigh, m)
         this.rimNode = smoothstep(this.uRimLow, this.uRimMid, m).sub(this.insideNode)
 
         this.rimEmissiveNode = this.uRimColor.mul(this.rimNode).mul(this.uRimIntensity)
+    }
+
+    setShaderDirect() {
+        this.finishNodes(this.buildInterior(positionWorld.xz), this.buildCoverage(positionWorld.xz))
+    }
+
+    setupBake(makeOutput, {needsAlpha = false} = {}) {
+        this.rttSize = 1024
+        this.renderTarget = new THREE.RenderTarget(this.rttSize, this.rttSize, {
+            type: THREE.HalfFloatType,
+        })
+
+        this.rttScene = new THREE.Scene()
+        this.rttCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1)
+
+        const quadMaterial = needsAlpha
+            ? new THREE.MeshBasicNodeMaterial({transparent: true, blending: THREE.NoBlending})
+            : new THREE.MeshBasicNodeMaterial()
+
+        const bakeUv = vec2(uv().x, float(1).sub(uv().y))
+        const worldP = bakeUv.mul(this.uMaskSize).add(this.uMaskMin)
+        quadMaterial.colorNode = makeOutput(worldP)
+
+        const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), quadMaterial)
+        quad.position.z = -0.5
+        this.rttScene.add(quad)
+
+        return texture(
+            this.renderTarget.texture,
+            positionWorld.xz.sub(this.uMaskMin).div(this.uMaskSize)
+        )
+    }
+
+    setShaderRTT() {
+        const field = this.setupBake(
+            (worldP) => vec4(this.buildInterior(worldP), this.buildCoverage(worldP)),
+            {needsAlpha: true}
+        )
+        this.finishNodes(field.rgb, field.a)
+    }
+
+    setShaderHybrid() {
+        const field = this.setupBake((worldP) => vec4(this.buildCoverage(worldP), 0, 0, 1))
+        this.finishNodes(this.buildInterior(positionWorld.xz), field.r)
+    }
+
+    update() {
+        if (!this.renderTarget) return
+
+        const renderer = this.experience.renderer.instance
+        renderer.setRenderTarget(this.renderTarget)
+        renderer.render(this.rttScene, this.rttCamera)
+        renderer.setRenderTarget(null)
     }
 
     applyTo(material, {preserveAlpha = false} = {}) {
@@ -401,6 +472,8 @@ export default class Corruption {
         if (!this.debug.active) return
 
         this.debugParams = {cleanseRadius: 5}
+
+        this.debugFolder.addBinding(this, 'corruptionMode', {label: 'Mode', readonly: true})
 
         this.debugFolder.addButton({title: 'Cleanse at character', label: 'Cleanse'}).on('click', () => {
             const pos = this.experience.world.character.model.position
