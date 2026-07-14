@@ -88,6 +88,41 @@ export default [
         type: 'texture',
         path: 'textures/leaf.png',
     },
+
+    // NOISE
+    {
+        name: 'noiseTexture',
+        type: 'texture',
+        path: 'textures/noise.png',
+    },
+
+    // WALLS
+    {
+        name: 'wallModel',
+        type: 'gltfModel',
+        path: 'models/wall.glb',
+    },
+    {
+        name: 'wallTexture',
+        type: 'texture',
+        path: 'textures/wall.png',
+    },
+    {
+        name: 'wallNormalTexture',
+        type: 'texture',
+        path: 'textures/wallNormal.png',
+    },
+    {
+        name: 'wallsPositionModel',
+        type: 'gltfModel',
+        path: 'models/terrainWalls.glb',
+    },
+    {
+        name: 'wallsCollisionModel',
+        type: 'gltfModel',
+        path: 'models/wallsCollision.glb',
+    },
+
     // BEAM
     {
         name: 'beamMiddleTexture',
@@ -121,11 +156,72 @@ export default [
         type: 'audio',
         path: 'sounds/ambient.ogg',
     },
-
-    // MISC
     {
-        name: 'noiseTexture',
-        type: 'texture',
-        path: 'textures/noise.png',
+        name: 'step1Sound',
+        type: 'audio',
+        path: 'sounds/step1.ogg',
     },
+    {
+        name: 'step2Sound',
+        type: 'audio',
+        path: 'sounds/step2.ogg',
+    },
+    {
+        name: 'step3Sound',
+        type: 'audio',
+        path: 'sounds/step3.ogg',
+    },
+    {
+        name: 'step4Sound',
+        type: 'audio',
+        path: 'sounds/step4.ogg',
+    },
+    {
+        name: 'step5Sound',
+        type: 'audio',
+        path: 'sounds/step5.ogg',
+    },
+    {
+        name: 'step6Sound',
+        type: 'audio',
+        path: 'sounds/step6.ogg',
+    },
+    {
+        name: 'step7Sound',
+        type: 'audio',
+        path: 'sounds/step7.ogg',
+    },
+    // {
+    //     name: 'dogBarkSound',
+    //     type: 'audio',
+    //     path: 'sounds/dogBark.ogg',
+    // },
+
+    // SONGS
+    {
+        name: 'rotatingSong1',
+        type: 'audio',
+        path: 'sounds/song_dark_fantasy.ogg',
+    },
+    {
+        name: 'rotatingSong2',
+        type: 'audio',
+        path: 'sounds/song_dark_liminal_void.ogg',
+    },
+    {
+        name: 'dragonSong',
+        type: 'audio',
+        path: 'sounds/song_oblivion_like.ogg',
+    },
+    {
+        name: 'creditsSong',
+        type: 'audio',
+        path: 'sounds/song_relaxing_morning.ogg',
+    },
+    {
+        name: 'healthyPatchSong',
+        type: 'audio',
+        path: 'sounds/song_skyrim_like.ogg',
+    },
+
 ]

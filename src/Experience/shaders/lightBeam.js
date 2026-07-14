@@ -75,6 +75,8 @@ export default class LightBeam {
         this.releasedAt = null
         this.growAtRelease = 1
         this.lastCleanseAt = 0
+        // 0..1 beam-intensity envelope, read by Character to weight the cast anim
+        // this.grow = 0
 
         this.mouseNdc = new THREE.Vector2()
         window.addEventListener('pointermove', (event) => {
@@ -500,10 +502,13 @@ export default class LightBeam {
                 if (this.loopSound.isPlaying) this.loopSound.stop()
                 this.activatedAt = null
                 this.releasedAt = null
+                // this.grow = 0
                 return
             }
             grow = this.growAtRelease * (1 - s * s * s)
         }
+
+        // this.grow = grow
 
         this.origin.copy(character.model.position)
         this.origin.y += this.params.chestHeight

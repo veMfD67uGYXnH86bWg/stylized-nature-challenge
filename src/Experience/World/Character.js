@@ -35,6 +35,7 @@ export default class Character {
         this.setPosition()
         this.setBoundingBox()
         this.setAnimation()
+        this.setSounds()
 
         window.addEventListener('keydown', (e) => {
             if (e.code === 'ShiftLeft') this.isRunning = !this.isRunning
@@ -152,6 +153,49 @@ export default class Character {
         this.playAnimation()
     }
 
+    setSounds() {
+        this.stepBuffers = [1, 2, 3, 4, 5, 6, 7].map(i => this.resources.items[`step${i}Sound`])
+        this.stepSound = new THREE.PositionalAudio(this.experience.listener)
+        this.stepSound.setRefDistance(2)
+
+        this.params.stepVolume = 2.45
+        this.stepSound.setVolume(this.params.stepVolume)
+        this.model.add(this.stepSound)
+
+        this.stepAccumulator = 0
+        this.params.stepDistance = 1.35
+        this.params.strideRunFactor = 2.0
+
+        if (this.debug.active) {
+            this.debugFolder.addBinding(this.params, 'stepDistance', {
+                label: 'Step Distance',
+                min: 0.2,
+                max: 3,
+                step: 0.05,
+            })
+            this.debugFolder.addBinding(this.params, 'strideRunFactor', {
+                label: 'Run Stride Factor',
+                min: 1,
+                max: 4,
+                step: 0.05,
+            })
+            this.debugFolder.addBinding(this.params, 'stepVolume', {
+                label: 'Step Volume',
+                min: 0,
+                max: 3,
+                step: 0.01,
+            }).on('change', (e) => this.stepSound.setVolume(e.value))
+        }
+    }
+
+    playStep() {
+        const buffer = this.stepBuffers[Math.floor(Math.random() * this.stepBuffers.length)]
+        if (this.stepSound.isPlaying) this.stepSound.stop()
+        this.stepSound.setBuffer(buffer)
+        this.stepSound.setPlaybackRate(0.9 + Math.random() * 0.2)   // ±10% pitch = free extra variety
+        this.stepSound.play()
+    }
+
     update() {
         if (this.animation)
             this.animation.mixer.update(this.time.delta * 0.001)
@@ -159,6 +203,15 @@ export default class Character {
         this.handleMovement()
         this.handleCollision()
 
+        const dx = this.model.position.x - this.previousPosition.x
+        const dz = this.model.position.z - this.previousPosition.z
+        this.stepAccumulator += Math.hypot(dx, dz)
+
+        const stride = this.params.stepDistance * (this.running ? this.params.strideRunFactor : 1)
+        if (this.stepAccumulator >= stride) {
+            this.stepAccumulator = 0
+            this.playStep()
+        }
     }
 
     handleMovement() {
@@ -167,6 +220,8 @@ export default class Character {
         const move = this.input.getMove()
         this.direction.set(move.x, 0, move.z)
         const running = move.forceRun !== null ? move.forceRun : this.isRunning
+
+        this.running = running // strides
 
         if (this.direction.length() > 0) {
 

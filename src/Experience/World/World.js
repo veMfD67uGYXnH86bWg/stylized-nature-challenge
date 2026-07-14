@@ -3,12 +3,14 @@ import Environment from './Environment.js'
 import Character from './Character.js'
 import Shapes from './Shapes.js'
 import Terrain from './Terrain.js'
+import Wall from './Wall.js'
 import Dragon from './Dragon.js'
 import Trees from './Trees.js'
 import Corruption from '../shaders/Corruption.js'
 import LightBeam from '../shaders/lightBeam.js'
 // import Grass from './Grass.js'
 import GrassShader from '../shaders/GrassShader.js'
+import MusicManager from '../utils/MusicManager.js'
 
 import * as THREE from 'three/webgpu'
 
@@ -23,12 +25,14 @@ export default class World {
             this.environment = new Environment()
             this.terrain = new Terrain()
             this.corruption = new Corruption()
+            this.wall = new Wall()
             // this.grass = new Grass()
             this.grassShader = new GrassShader()
             this.character = new Character()
             this.dragon = new Dragon()
             this.trees = new Trees()
             this.lightBeam = new LightBeam()
+            this.musicManager = new MusicManager()
 
             // this.generateShapes()
 
@@ -101,5 +105,7 @@ export default class World {
             this.dragon.update()
         if (this.lightBeam)
             this.lightBeam.update()
+        if (this.musicManager)
+            this.musicManager.update()
     }
 }

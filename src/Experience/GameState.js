@@ -8,8 +8,13 @@ export default class GameState extends EventEmitter {
         this.debug = this.experience.debug
 
         this.beamLevel = 0
+        this.isCredits = false
 
         this.setDebug()
+    }
+
+    setCredits(value) {
+        this.isCredits = value
     }
 
     setBeamLevel(level) {
@@ -42,5 +47,6 @@ export default class GameState extends EventEmitter {
             this.setBeamLevel(this.beamLevel + 1)
             this.debug.ui.refresh()
         })
+        this.debugFolder.addBinding(this, 'isCredits', {label: 'Credits'})
     }
 }
