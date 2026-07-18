@@ -148,6 +148,7 @@ export default class Corruption {
         const res = 256
         this.maskRes = res
         this.maskData = new Uint8Array(res * res)
+        this.levelData = new Uint8Array(res * res)
 
         let terrainMesh = null
         this.terrain.model.traverse((child) => {
@@ -192,14 +193,24 @@ export default class Corruption {
             for (let i = 0; i < res; i++) {
                 const px = Math.min(img.width - 1, Math.floor(i / res * img.width))
                 const py = Math.min(img.height - 1, Math.floor(j / res * img.height))
-                this.maskData[j * res + i] = pixels[(py * img.width + px) * 4]
+                // this.maskData[j * res + i] = pixels[(py * img.width + px) * 4]   // old: red channel only
+
+                const pixelIndex = (py * img.width + px) * 4
+                const r = pixels[pixelIndex]
+                const g = pixels[pixelIndex + 1]
+                const b = pixels[pixelIndex + 2]
+                const coverage = Math.max(r, g, b)
+
+                const index = j * res + i
+                this.maskData[index] = coverage
+                this.levelData[index] = coverage < 8 ? 0 : (r >= g && r >= b ? 1 : g >= b ? 2 : 3)
             }
         }
 
         this.maskTexture.needsUpdate = true
     }
 
-    paintMask(worldX, worldZ, radius, isCorrupt) {
+    paintMask(worldX, worldZ, radius, isCorrupt, level) {
         const res = this.maskRes
         const toPxX = (x) => (x - this.maskMinX) / this.maskWidth * res
         const toPxZ = (z) => (z - this.maskMinZ) / this.maskDepth * res
@@ -228,7 +239,12 @@ export default class Corruption {
                 const index = j * res + i
                 if (isCorrupt) {
                     this.maskData[index] = Math.max(this.maskData[index], Math.round(t * 255))
+                    this.levelData[index] = Math.max(this.levelData[index], level)
                 } else {
+                    // the level gate: a texel of a higher tier ignores this beam.
+                    // Per-texel (not per-stamp) so a stamp straddling a tier
+                    // border cleanses only the side the beam is strong enough for
+                    if (this.levelData[index] > level) continue
                     this.maskData[index] = Math.min(this.maskData[index], Math.round((1 - t) * 255))
                 }
             }
@@ -240,12 +256,12 @@ export default class Corruption {
         if (grass) grass.lastCenterX = null
     }
 
-    corrupt(x, z, radius) {
-        this.paintMask(x, z, radius, true)
+    corrupt(x, z, radius, level = 1) {
+        this.paintMask(x, z, radius, true, level)
     }
 
-    cleanse(x, z, radius) {
-        this.paintMask(x, z, radius, false)
+    cleanse(x, z, radius, level = Infinity) {
+        this.paintMask(x, z, radius, false, level)
     }
 
     getCorruptionAt(x, z) {
@@ -253,6 +269,13 @@ export default class Corruption {
         const j = Math.floor((z - this.maskMinZ) / this.maskDepth * this.maskRes)
         if (i < 0 || i >= this.maskRes || j < 0 || j >= this.maskRes) return 0
         return this.maskData[j * this.maskRes + i] / 255
+    }
+
+    getCorruptionLevelAt(x, z) {
+        if (this.getCorruptionAt(x, z) < 0.03) return 0
+        const i = Math.floor((x - this.maskMinX) / this.maskWidth * this.maskRes)
+        const j = Math.floor((z - this.maskMinZ) / this.maskDepth * this.maskRes)
+        return this.levelData[j * this.maskRes + i]
     }
 
 
@@ -470,7 +493,7 @@ export default class Corruption {
     setDebug() {
         if (!this.debug.active) return
 
-        this.debugParams = {cleanseRadius: 5}
+        this.debugParams = {cleanseRadius: 5, corruptLevel: 1}
 
         this.debugFolder.addBinding(this, 'corruptionMode', {label: 'Mode', readonly: true})
 
@@ -480,9 +503,10 @@ export default class Corruption {
         })
         this.debugFolder.addButton({title: 'Corrupt at character', label: 'Corrupt'}).on('click', () => {
             const pos = this.experience.world.character.model.position
-            this.corrupt(pos.x, pos.z, this.debugParams.cleanseRadius)
+            this.corrupt(pos.x, pos.z, this.debugParams.cleanseRadius, this.debugParams.corruptLevel)
         })
         this.debugFolder.addBinding(this.debugParams, 'cleanseRadius', {label: 'Radius', min: 1, max: 20, step: 0.5})
+        this.debugFolder.addBinding(this.debugParams, 'corruptLevel', {label: 'Corrupt Level', min: 1, max: 3, step: 1})
 
         const strandFolder = this.debugFolder.addFolder({title: 'Strands'})
         strandFolder.addBinding(this.params, 'strandInfluence', {min: 0, max: 1, step: 0.01})

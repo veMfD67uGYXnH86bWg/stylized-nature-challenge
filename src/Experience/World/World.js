@@ -5,6 +5,7 @@ import Shapes from './Shapes.js'
 import Terrain from './Terrain.js'
 import Wall from './Wall.js'
 import Dragon from './Dragon.js'
+import {RENDER_ORDER} from './Silhouette.js'
 import Trees from './Trees.js'
 import Corruption from '../shaders/Corruption.js'
 import LightBeam from '../shaders/lightBeam.js'
@@ -36,7 +37,21 @@ export default class World {
 
             // this.generateShapes()
 
+            this.setSilhouetteOccluders()
             this.setPerfDebug()
+        })
+    }
+
+    setSilhouetteOccluders() {
+        const excluded = [
+            this.grassShader?.mesh,
+            this.terrain?.model,
+        ]
+
+        excluded.forEach((root) => {
+            root?.traverse((child) => {
+                if (child.isMesh) child.renderOrder = RENDER_ORDER.NON_OCCLUDER
+            })
         })
     }
 

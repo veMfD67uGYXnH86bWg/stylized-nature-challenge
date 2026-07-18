@@ -37,7 +37,7 @@ export default class Renderer {
     setInstance() {
         this.instance = new THREE.WebGPURenderer({
             canvas: this.canvas,
-            antialias: true
+            antialias: true,
         })
 
         this.instance.toneMapping = THREE.CineonToneMapping

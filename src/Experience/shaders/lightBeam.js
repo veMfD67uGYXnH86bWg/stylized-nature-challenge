@@ -26,6 +26,7 @@ export default class LightBeam {
         this.sizes = this.experience.sizes
         this.time = this.experience.time
         this.resources = this.experience.resources
+        this.gameState = this.experience.gameState
 
         this.params = {
             maxDistance: 6,
@@ -462,7 +463,8 @@ export default class LightBeam {
         if (!character) return
 
         const beamAim = this.input.getBeamAim()
-        const firing = this.input.isPressed('KeyF') || beamAim.active
+        // canFire: locked until the dragon's gift (always on when debug is active)
+        const firing = (this.input.isPressed('KeyF') || beamAim.active) && this.gameState.canFire()
 
         let grow
         if (firing) {
@@ -571,12 +573,14 @@ export default class LightBeam {
             && this.time.elapsed - this.lastCleanseAt >= this.params.cleanseInterval * 1000) {
             const corruption = this.experience.world.corruption
             if (corruption) {
+                // higher-tier corruption ignores stamps below its level
+                const cleanseLevel = this.gameState.getCleanseLevel()
                 const spacing = this.params.cleanseRadius * 0.7
                 for (let d = 0; d < beamLength; d += spacing) {
                     this.cleansePoint.copy(this.origin).addScaledVector(this.direction, d)
-                    corruption.cleanse(this.cleansePoint.x, this.cleansePoint.z, this.params.cleanseRadius)
+                    corruption.cleanse(this.cleansePoint.x, this.cleansePoint.z, this.params.cleanseRadius, cleanseLevel)
                 }
-                corruption.cleanse(this.target.x, this.target.z, this.params.cleanseRadius)
+                corruption.cleanse(this.target.x, this.target.z, this.params.cleanseRadius, cleanseLevel)
             }
             this.lastCleanseAt = this.time.elapsed
         }

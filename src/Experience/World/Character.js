@@ -1,6 +1,7 @@
 import * as THREE from 'three/webgpu'
 import Experience from '../Experience.js'
 import Outline from './Outline.js'
+import Silhouette, {RENDER_ORDER} from './Silhouette.js'
 
 export default class Character {
     constructor() {
@@ -93,6 +94,37 @@ export default class Character {
         if (this.debug.active) {
             this.debugFolder.addBinding(this.params, 'outline', {label: 'Outline', min: 0, max: 0.1, step: 0.001})
                 .on('change', e => this.outline.uThickness.value = e.value)
+        }
+
+        this.model.traverse((child) => {
+            if (child.isMesh) child.renderOrder = RENDER_ORDER.CHARACTER
+        })
+
+        this.params.silhouetteColor = '#94d4db'
+        this.params.silhouetteDarken = 0.55
+        this.params.silhouetteContour = 0.012
+        this.silhouette = new Silhouette({
+            silhouetteColor: this.params.silhouetteColor,
+            contourDarken: this.params.silhouetteDarken,
+            contourThickness: this.params.silhouetteContour,
+        }).add(this.model)
+        if (this.debug.active) {
+            this.debugFolder.addBinding(this.params, 'silhouetteColor', {label: 'Silhouette Color'})
+                .on('change', e => this.silhouette.uColor.value.set(e.value))
+            this.debugFolder.addBinding(this.params, 'silhouetteDarken', {
+                label: 'Contour Darken',
+                min: 0,
+                max: 1,
+                step: 0.01
+            })
+                .on('change', e => this.silhouette.uDarken.value = e.value)
+            this.debugFolder.addBinding(this.params, 'silhouetteContour', {
+                label: 'Contour Thickness',
+                min: 0,
+                max: 0.05,
+                step: 0.001
+            })
+                .on('change', e => this.silhouette.uThickness.value = e.value)
         }
     }
 
@@ -192,7 +224,7 @@ export default class Character {
         const buffer = this.stepBuffers[Math.floor(Math.random() * this.stepBuffers.length)]
         if (this.stepSound.isPlaying) this.stepSound.stop()
         this.stepSound.setBuffer(buffer)
-        this.stepSound.setPlaybackRate(0.9 + Math.random() * 0.2)   // ±10% pitch = free extra variety
+        this.stepSound.setPlaybackRate(0.9 + Math.random() * 0.2)   // 10% pitch
         this.stepSound.play()
     }
 

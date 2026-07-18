@@ -26,6 +26,7 @@ export default class Outline {
             }
             shell.castShadow = false
             shell.receiveShadow = false
+            shell.userData.isShell = true   // so other passes skip it
             mesh.add(shell)
         })
 
